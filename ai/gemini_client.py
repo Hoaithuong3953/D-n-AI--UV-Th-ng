@@ -1,0 +1,136 @@
+from typing import Generator, List, Dict
+from google.api_core import exceptions as google_exceptions
+import google.generativeai as genai
+
+from utils.logger import logger
+from utils.exceptions import LLMServiceError, ValidationError
+from utils.retry import gemini_retry
+from domain.interfaces import LLMClient
+
+class GeminiClient(LLMClient):
+    """
+    Gemini implementation of LLMClient
+    """
+    def __init__(self, api_key: str, model_name: str, request_timeout: int):
+        """
+        Initialize GeminiClient
+
+        Args:
+            api_key: Gemini API key
+            model_name: Gemini model name
+
+        Raises:
+            ValidationError: If api_key or model_name is invalid
+            LLMServiceError: If SDK initialization fails unexpectedly
+        """
+        self._validate_config(api_key, model_name)
+
+        self.api_key = api_key
+        self.model_name = model_name
+        self.request_timeout = request_timeout
+
+        self.model = self._init_model()
+        
+    def _validate_config(self, api_key: str, model_name: str) -> None:
+        """
+        Validate config before initializing the SDK
+
+        Raises:
+            ValidationError: If configuration is invalid
+        """
+        if not api_key or not api_key.strip():
+            raise ValidationError(message="Gemini API key must not be empty")
+        
+        if not model_name or not model_name.strip():
+            raise ValidationError(message="Gemini model name must not be empty")
+        
+    def _init_model(self):
+        """
+        Initialize Gemini SDK model
+
+        Returns:
+            GenerativeModel: intialized Gemini model
+
+        Raises:
+            ValidationError: On invalid API key or model name
+            LLMServiceError: On unexpected SDK initialization errors
+        """
+        try:
+            genai.configure(api_key=self.api_key)
+            model = genai.GenerativeModel(self.model_name)
+            logger.info(f"GeminiClient initialized with model: {self.model_name}")
+            return model
+        except google_exceptions.InvalidArgument as e:
+            raise ValidationError(
+                message="Invalid Gemini API key or model name"
+            ) from e
+        except Exception as e:
+            raise LLMServiceError(
+                code="LLM_INIT_FAILED", 
+                message=f"Failed to init Gemini client"
+            ) from e
+        
+    @gemini_retry(max_retries=3)
+    def generate_text(self, prompt: str) -> str:
+        """
+        Generate text from prompt
+
+        Args:
+            prompt: Input text. If empty, returns empty string
+
+        Returns:
+            str: Generate content. Empty string if blocked/filtered
+
+        Raises:
+            LLMServiceError: On transient errors (timeout, 5xx) after retries
+        """
+        if not prompt or not prompt.strip():
+            return ValidationError(message="Prompt must not be empty")
+        
+        try:
+            response = self.model.generate_content(prompt, request_options={"timeout": self.request_timeout})
+        except google_exceptions.GoogleAPICallError as e:
+            raise LLMServiceError(
+                code="GENERATION_FAILED",
+                message="Failed to generate content from Gemini"
+            ) from e
+        
+        if not getattr(response, "text", None):
+            raise LLMServiceError(
+                code="EMPTY_RESPONSE", 
+                message="Gemini returned empty response"
+            ) from e
+        
+        return response.text.strip()
+        
+    def stream_chat(self, history: List[Dict[str, str]], new_message: str) -> Generator[str, None, None]:
+        """
+        Stream chat response from Gemini
+
+        Args:
+            history: List of previous chat messages (role/content)
+            new_message: User's new message
+
+        Yields:
+            Chunks of generated text as they arrive
+
+        Raises:
+            ValidationError: If new_message empty
+            LLMServiceError: On Gemini streaming failure
+        """
+        if not new_message or not new_message.strip():
+            return ValidationError(message="New message must be not empty")
+        
+        try:
+            chat = self.model.start_chat(history=history)
+            stream = chat.send_message(new_message, stream=True, request_options={"timeout": self.stream_timeout})
+
+            for chunk in stream:
+                if getattr(chunk, "text", None):
+                    yield chunk.text
+        
+        except google_exceptions.GoogleAPICallError as e:
+            raise LLMServiceError(
+                code="STREAM_FAILED", 
+                message="Failed to stream response from Gemini"
+            ) from e

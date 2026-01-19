@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Optional
+from typing import Any, Optional, Dict
 
 class LearnPathException(Exception):
     code: str = "GENERAL_ERROR"
@@ -10,7 +10,7 @@ class LearnPathException(Exception):
         self,
         message: Optional[str] = None,
         code: Optional[str] = None,
-        status_code: Optional[str] = None,
+        status_code: Optional[int] = None,
         **kwargs: Any,
     ):
         self.message = message or self.message
@@ -20,7 +20,7 @@ class LearnPathException(Exception):
         
         super().__init__(self.message)
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         return {
             "error": {
                 "code": self.code,

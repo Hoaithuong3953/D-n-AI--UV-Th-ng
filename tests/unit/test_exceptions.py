@@ -104,3 +104,29 @@ class TestLLMServiceError:
 
         assert isinstance(exc, LearnPathException)
         assert isinstance(exc, Exception)
+
+class TestValidationError:
+    """
+    Test ValidationError exception
+    """
+    def test_default_values(self):
+        """Test ValidationError with default values"""
+        exc = ValidationError()
+        
+        assert exc.code == "VALIDATION_ERROR"
+        assert exc.message == "Invalid input data provided"
+        assert exc.status_code == HTTPStatus.BAD_REQUEST.value
+
+    def test_custom_message(self):
+        """Test ValidationError with custom message"""
+        exc = ValidationError(message="Invalid user input: empty string")
+        
+        assert exc.code == "VALIDATION_ERROR"
+        assert exc.message == "Invalid user input: empty string"
+        assert exc.status_code == HTTPStatus.BAD_REQUEST.value
+
+    def test_inheritance(self):
+        """Test that ValidationError inherits from LearnPathException"""
+        exc = ValidationError()
+        assert isinstance(exc, LearnPathException)
+        assert isinstance(exc, Exception)

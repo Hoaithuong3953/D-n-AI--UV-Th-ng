@@ -44,9 +44,9 @@ class UserProfile(BaseModel):
     time_commitment:str = Field(..., description="Daily time user can commit to learning (e.g., 30 minutes, 2 hours)")
 
 class ChatMessage(BaseModel):
-    role: Literal["user", "assistant"] = Field(
+    role: Literal["system", "user", "assistant"] = Field(
         ..., 
-        description="Message role: 'user' or 'assistant'"
+        description="Message role: 'system', 'user' or 'assistant'"
     )
     content: str = Field(..., description="Message content")
     timestamp: datetime = Field(

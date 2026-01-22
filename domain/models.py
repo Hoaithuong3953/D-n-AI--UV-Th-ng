@@ -2,9 +2,9 @@ from pydantic import BaseModel, Field
 from typing import List
 from datetime import datetime
 
-class Resources(BaseModel):
+class Resource(BaseModel):
     """
-    Represents a single learning resources included in a milestone
+    Represents a single learning resource included in a milestone
     """
     title: str = Field(..., description="Title of the resource")
     url: str = Field(..., description="Direct link to the resource")
@@ -18,7 +18,7 @@ class Milestone(BaseModel):
     week: int = Field(..., ge=1, description="Week number in the roadmap (starting from 1)")
     topic: str = Field(..., description="Main topic covered in this week")
     description: str = Field(..., description="Detailed description of what will be learned in this week")
-    resources: List[Resources] = Field(
+    resources: List[Resource] = Field(
         default_factory=list,
         description="List of recommended resources for this milestone"
     )

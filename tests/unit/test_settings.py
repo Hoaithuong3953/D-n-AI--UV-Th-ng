@@ -41,3 +41,32 @@ class TestSettingsFields:
                 for error in errors
             )
 
+class TestSettingsFromEvironment:
+    """Test settings loading from environment variables"""
+
+    def test_load_model(self):
+        """Test loading model settings from environment"""
+        env_vars = {
+            "GEMINI_API_KEY": VALID_GEMINI_API_KEY,
+            "GEMINI_MODEL": "gemini-2.5-pro"
+        }
+
+        with patch.dict(os.environ, env_vars):
+            settings = Settings(_env_file = None)
+
+            assert settings.GEMINI_MODEL == "gemini-2.5-pro"
+
+    def test_load_logging(self):
+        """Test loading logging settings from environment"""
+        env_vars = {
+            "GEMINI_API_KEY": VALID_GEMINI_API_KEY,
+            "LOG_LEVEL": "DEBUG",
+            "LOG_TO_FILE": "true",
+            "LOG_FILE_PATH": "custom/logs/app.log"
+        }
+
+        with patch.dict(os.environ, env_vars):
+            settings = Settings(_env_file=None)
+            assert settings.LOG_LEVEL == "DEBUG"
+            assert settings.LOG_TO_FILE is True
+            assert settings.LOG_FILE_PATH == "custom/logs/app.log"

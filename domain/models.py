@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Literal
+from typing import List, Literal, Optional
 from datetime import datetime
 
 class Resource(BaseModel):
@@ -11,6 +11,11 @@ class Resource(BaseModel):
     type: Literal["video", "article", "book", "cource", "practice", "project", "documentation"] = Field(
         ..., 
         description="Type of resource"
+    )
+    description: Optional[str] = Field(None, description="Description of the resource")
+    difficulty: Optional[Literal["beginner", "intermediate", "advanced"]] = Field(
+        None,
+        description="Difficulty level of the resource"
     )
 
 class Milestone(BaseModel):

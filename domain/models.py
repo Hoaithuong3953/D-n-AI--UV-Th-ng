@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, field_validator, ValidationInfo
+from pydantic import BaseModel, Field, field_validator, model_validator, ValidationInfo
 from typing import List, Literal, Optional
 from datetime import datetime
 
@@ -44,6 +44,13 @@ class Roadmap(BaseModel):
     milestones: List[Milestone] = Field(..., min_length=1, description="List of weekly milestones")
     prerequisites: Optional[List[str]] = Field(None, description="Prerequisites required before starting")
     created_at: datetime = Field(default_factory=datetime.now, description="Timestamp when the roadmap was generated")
+
+    @model_validator(mode="after")
+    def set_default_title(self):
+        """Auto-set title = topic if title is not provided"""
+        if not self.title:
+            self.title = self.topic
+        return self
 
     @field_validator('milistones')
     @classmethod

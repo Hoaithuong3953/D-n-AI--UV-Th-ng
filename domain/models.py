@@ -30,6 +30,8 @@ class Milestone(BaseModel):
         default_factory=list,
         description="List of recommended resources for this milestone"
     )
+    estimated_time: Optional[str] = Field(None, description="Estimated time for this week (e.g., '5 giờ')")
+    learning_objectives: Optional[List[str]] = Field(None, description="Learning objectives for this week")
 
 class Roadmap(BaseModel):
     """

@@ -8,7 +8,7 @@ class Resource(BaseModel):
     """
     title: str = Field(..., max_length=200, description="Title of the resource")
     url: HttpUrl = Field(..., description="Direct link to the resource")
-    type: Literal["video", "article", "book", "cource", "practice", "project", "documentation"] = Field(
+    type: Literal["video", "article", "book", "course", "practice", "project", "documentation"] = Field(
         ..., 
         description="Type of resource"
     )
@@ -28,7 +28,7 @@ class Milestone(BaseModel):
     description: str = Field(...,max_length=1000, description="Detailed description of what will be learned in this week")
     resources: List[Resource] = Field(
         ...,
-        max_length=1,
+        min_length=1,
         description="List of recommended resources for this milestone"
     )
     estimated_time: Optional[str] = Field(None, description="Estimated time for this week (e.g., '5 giờ')")
@@ -40,7 +40,7 @@ class Roadmap(BaseModel):
     """
     topic: str = Field(..., max_length=200, description="Overall main topic of the learning path")
     title: Optional[str] = Field(None, max_length=200, description="Display title (auto-set to topic if not provided)")
-    desciption: Optional[str] = Field(None, max_length=1000, description="Overall description of roadmap content and goals")
+    description: Optional[str] = Field(None, max_length=1000, description="Overall description of roadmap content and goals")
     duration_week: int = Field(..., ge=1, description="Total duration of the roadmap in weeks")
     milestones: List[Milestone] = Field(..., min_length=1, description="List of weekly milestones")
     prerequisites: Optional[List[str]] = Field(None, description="Prerequisites required before starting")
@@ -53,7 +53,7 @@ class Roadmap(BaseModel):
             self.title = self.topic
         return self
 
-    @field_validator('milistones')
+    @field_validator('milestones')
     @classmethod
     def validate_milestones(cls, v: List[Milestone], info: ValidationInfo) -> List[Milestone]:
         """

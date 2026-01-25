@@ -1,0 +1,121 @@
+[
+    {
+        "topic": "Học Python cơ bản",
+        "title": "Lộ trình học Python từ số 0",
+        "description": "Lộ trình học Python cơ bản cho người mới bắt đầu",
+        "duration_week": 4,
+        "milestones": [
+            {
+                "week":1,
+                "topic": "Python Basics",
+                "description": "Học về biến, kiểu dữ liệu và cấu trúc điều khiển",
+                "estimated_time": "10 giờ",
+                "learning_objective": [
+                    "Hiểu về biến và kiểu dữ liệu",
+                    "Sử dụng if/else, for, while",
+                    "Làm quen với Python syntax"
+                ],
+                "resources": [
+                    {
+                        "title": "Python Offical Tutorial",
+                        "url": "https://docs.python.org/3/tutorial/",
+                        "type": "documentation",
+                        "description": "Tài liệu chính thức của Python",
+                        "difficulty": "beginner"
+                    },
+                    {
+                        "title": "Python for Beginners",
+                        "url": "https://www.youtube.com/watch?v=kqtD5dpn9C8",
+                        "type": "video",
+                        "description": "Video hướng dẫn Python cho người mới",
+                        "difficulty": "beginner"
+                    }
+                ]
+            },
+            {
+                "week": 2,
+                "topic": "Functions and Modules",
+                "description": "Học về functions, modules và packages",
+                "estimated_time": "8 giờ",
+                "learning_objective": [
+                    "Tạo và sử dụng functions",
+                    "Import và sử dụng modules",
+                    "Hiểu về scope và namespaces"
+                ],
+                "resources": [
+                    {
+                        "title": "Python Functions",
+                        "url": "https://docs.python.org/3/tutorial/controlflow.html#defining-functions",
+                        "type": "documentation",
+                        "description": "Tài liệu về functions trong Python",
+                        "difficulty": "beginner"
+                    }
+                ]
+            },
+            {
+                "week": 3,
+                "topic": "Data Structures",
+                "description": "Học về list, dict, tuple, set",
+                "estimated_time": "12 giờ",
+                "learning_objective": [
+                    "Sử dụng list, dict, tuple, set",
+                    "Hiểu về list comprehensions",
+                    "Thao tác với data structures"
+                ],
+                "resources": [
+                    {
+                        "title": "Python Data Structures",
+                        "url": "https://docs.python.org/3/tutorial/datastructures.html",
+                        "type": "documentation",
+                        "description": "Tài liệu về data structures trong Python",
+                        "difficulty": "intermediate"
+                    }
+                ]
+            },
+            {
+                "week": 4,
+                "topic": "Object-Oiriented Programming",
+                "description": "Học về classes, objects, inheritance",
+                "estimated_time": "10 giờ",
+                "learning_objective": [
+                    "Tạo và sử dụng classes",
+                    "Hiểu về inheritance",
+                    "Sử dụng OOP priciples"
+                ],
+                "resources": [
+                    {
+                        "title": "Python Classes",
+                        "url": "https://docs.python.org/3/tutorial/classes.html",
+                        "type": "documentation",
+                        "description": "Tài liệu về OOP trong Python",
+                        "difficulty": "intermediate"
+                    }
+                ]
+            }
+        ],
+        "prerequisites": [
+            "Biết cách sử dụng máy tính cơ bản",
+            "Có tài khoản github"
+        ]
+    },
+    {
+        "topic": "Học Web Development với Python",
+        "duration_week": 8,
+        "milestones": [
+            {
+                "week": 1,
+                "topic": "HTML & CSS Basics",
+                "description": "Học HTML và CSS cơ bản",
+                "resources": [
+                    {
+                        "title": "MDN Web Docs",
+                        "url": "https://developer.mozilla.org/",
+                        "type": "documentation",
+                        "description": "Tài liệu về HTML và CSS",
+                        "difficulty": "beginner"
+                    }
+                ]
+            }
+        ]
+    }
+]

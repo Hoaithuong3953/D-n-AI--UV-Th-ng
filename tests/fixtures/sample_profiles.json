@@ -1,0 +1,34 @@
+[
+    {
+        "goal": "Học Python cơ bản để làm data science",
+        "current_level": "Beginner",
+        "time_commitment": "10 giờ/tuần",
+        "learning_style": "Video và thực hành",
+        "background": "Có kinh nghiệm với Excel, muốn chuyển sang Python",
+        "constraints": ["Chỉ học vào cuối tuần", "Ngân sách hạn chế"]
+    },
+    {
+        "goal": "Học Web Development với Python và Django",
+        "current_level": "Intermediate",
+        "time_commitment": "15 giờ/tuần",
+        "learning_style": "Đọc documentation và build projects",
+        "background": "Đã biết Python cơ bản, muốn học web development",
+        "constraints": []
+    },
+    {
+        "goal": "Học Machine Learning với Python",
+        "current_level": "Advanced",
+        "time_commitment": "20 giờ/tuần",
+        "learning_style": "Research papers và implementation",
+        "background": "Đã có nền tảng toán và Python tốt",
+        "constraints": ["Cần tài liệu tiếng Anh"]
+    },
+    {
+        "goal": "Học Python để automation",
+        "current_level": "Beginner",
+        "time_commitment": "5 giờ/tuần",
+        "learning_style": null,
+        "background": null,
+        "constraints": null
+    }
+]

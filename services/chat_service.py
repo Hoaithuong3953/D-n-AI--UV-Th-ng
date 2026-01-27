@@ -8,16 +8,29 @@ from domain.models import ChatMessage
 
 class ChatService:
     """
-    Service Layer for Chat Operations
-    Responsibility: Isolate the UI from the complexity of managing AI state and API calls
+    Service Layer for Chat Operations.
+    Responsibility: Isolate the UI from the complexity of managing AI state and API calls.
     """
     def __init__(self, ai_client: LLMClient, history: ChatHistory):
+        """
+        Initialize ChatService with AI client and memory storage
+
+        Args:
+            ai_client: LLM Client implementation
+            history: Chat history storage
+        """
         self.ai = ai_client
         self.history = history
 
     def process_message(self, user_input: str) -> Generator[str, None, None]:
         """
-        Processing a user's chat message
+        Processing a user's chat message and stream the AI response
+
+        Args:
+            user_input: The user's message text
+
+        Yields:
+            str: Chunks of the AI response as they are generated
         """
         if not user_input or not user_input.strip():
             logger.warning("Empty user input received in ChatService")
@@ -31,7 +44,14 @@ class ChatService:
 
     def _handle_stream_error(self, error: Exception, error_type: str) -> str:
         """
-        Helper method to handle streaming errors consistently.
+        Handle streaming errors and return user-friendly error messages
+
+        Args:
+            error: The exception that occured during streaming
+            error_type: Type of error for routing
+
+        Returns:
+            str: User-friendly error message formatted for display
         """
         if error_type == "llm_service":
             logger.error(f"AI Service error: {error}")
@@ -42,7 +62,13 @@ class ChatService:
 
     def _stream_response(self, user_input: str) -> Generator[str, None, None]:
         """
-        Handles the LLM streaming lifecycle.
+        Handle the LLM streaming lifecycle: load history, stream response, save result
+
+        Args:
+            user_input: The user's message that trigged that response
+
+        Yields:
+            str: Chunks of the AI-generated response as they arrive
         """
         raw_history = self.history.load_history()
         history_context = raw_history[:-1]

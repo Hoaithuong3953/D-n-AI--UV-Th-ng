@@ -32,9 +32,17 @@ class ChatService:
         Yields:
             str: Chunks of the AI response as they are generated
         """
-        if not user_input or not user_input.strip():
+        user_input = user_input.strip()
+
+        if not user_input:
             logger.warning("Empty user input received in ChatService")
             yield "Vui lòng nhập nội dung tin nhắn."
+            return
+        
+        MAX_INPUT_LENGTH = 2000
+        if len(user_input) > MAX_INPUT_LENGTH:
+            logger.warning(f"Input too long: {len(user_input)} chars")
+            yield f"Tin nhắn quá dài. Vui lòng giới hạn trong {MAX_INPUT_LENGTH} kí tự"
             return
 
         user_message = ChatMessage(role="user", content=user_input)

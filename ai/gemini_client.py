@@ -1,4 +1,4 @@
-from typing import Generator, List, Dict
+from typing import Generator, List, Optional
 from google.api_core import exceptions as google_exceptions
 import google.generativeai as genai
 
@@ -13,11 +13,12 @@ class GeminiClient:
     Gemini implementation of LLMClient
     """
     def __init__(
-        self, 
-        api_key: str, 
-        model_name: str, 
-        request_timeout: int, 
-        stream_timeout: int
+        self,
+        api_key: str,
+        model_name: str,
+        request_timeout: int,
+        stream_timeout: int,
+        system_prompt: str
     ):
         """
         Initialize GeminiClient
@@ -36,6 +37,7 @@ class GeminiClient:
         self.model_name = model_name
         self.request_timeout = request_timeout
         self.stream_timeout = stream_timeout
+        self.system_prompt = system_prompt
 
         self.model = self._init_model()
         
@@ -65,7 +67,10 @@ class GeminiClient:
         """
         try:
             genai.configure(api_key=self.api_key)
-            model = genai.GenerativeModel(self.model_name)
+            model = genai.GenerativeModel(
+                model_name=self.model_name,
+                system_instruction=self.system_prompt
+            )
             logger.info(f"GeminiClient initialized with model: {self.model_name}")
             return model
         except google_exceptions.InvalidArgument as e:

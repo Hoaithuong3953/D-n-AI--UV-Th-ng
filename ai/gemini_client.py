@@ -1,4 +1,4 @@
-from typing import Generator, List, Optional
+from typing import Generator, List, Dict, Any
 from google.api_core import exceptions as google_exceptions
 import google.generativeai as genai
 
@@ -82,6 +82,39 @@ class GeminiClient:
                 code="LLM_INIT_FAILED", 
                 message=f"Failed to init Gemini client"
             ) from e
+    
+    @staticmethod
+    def _to_gemini_history(history: List[ChatMessage]) -> List[Dict[str, Any]]:
+        f"""
+        Convert domain ChatMessage history into Gemini-compatible message objects
+
+        Args:
+            history: List of ChatMessage objects
+
+        Returns:
+            List of dicts in Gemini format
+            [
+                {
+                    "role": "user" | "model",
+                    "parts": [<message content>],
+                }
+            ]
+        """
+        converted: List[Dict[str, Any]] = []
+
+        for msg in history:
+            if msg.role == "assistant":
+                role = "model"
+            else:
+                role = "user"
+
+            converted.append(
+                {
+                    "role": role,
+                    "parts": [msg.content]
+                }
+            )
+        return converted
         
     @gemini_retry(max_retries=3)
     def generate_text(self, prompt: str) -> str:
@@ -131,11 +164,14 @@ class GeminiClient:
             ValidationError: If new_message empty
             LLMServiceError: On Gemini streaming failure
         """
-        if not new_message or not new_message.strip():
+        new_message = new_message.strip()
+        if not new_message:
             raise ValidationError(message="New message must be not empty")
         
+        gemini_history = self._to_gemini_history(history)
+        
         try:
-            chat = self.model.start_chat(history=history)
+            chat = self.model.start_chat(history=gemini_history)
             stream = chat.send_message(new_message, stream=True, request_options={"timeout": self.stream_timeout})
 
             for chunk in stream:

@@ -6,12 +6,19 @@ from utils.logger import logger
 from utils.exceptions import LLMServiceError, ValidationError
 from utils.retry import gemini_retry
 from ai.llm_client import LLMClient
+from domain import ChatMessage
 
 class GeminiClient:
     """
     Gemini implementation of LLMClient
     """
-    def __init__(self, api_key: str, model_name: str, request_timeout: int, stream_timeout: int):
+    def __init__(
+        self, 
+        api_key: str, 
+        model_name: str, 
+        request_timeout: int, 
+        stream_timeout: int
+    ):
         """
         Initialize GeminiClient
 
@@ -104,7 +111,7 @@ class GeminiClient:
         
         return response.text.strip()
         
-    def stream_chat(self, history: List[Dict[str, str]], new_message: str) -> Generator[str, None, None]:
+    def stream_chat(self, history: List[ChatMessage], new_message: str) -> Generator[str, None, None]:
         """
         Stream chat response from Gemini
 

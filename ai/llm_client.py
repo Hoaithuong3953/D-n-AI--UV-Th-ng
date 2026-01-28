@@ -1,4 +1,5 @@
-from typing import Protocol, List, Dict, Generator
+from typing import Protocol, List, Generator
+from domain import ChatMessage
 
 class LLMClient(Protocol):
     """
@@ -11,7 +12,7 @@ class LLMClient(Protocol):
         """
         ...
 
-    def stream_chat(self, history: List[Dict[str, str]], new_message: str) -> Generator[str, None, None]:
+    def stream_chat(self, history: List[ChatMessage], new_message: str) -> Generator[str, None, None]:
         """
         Generate a streaming response for chat
         """

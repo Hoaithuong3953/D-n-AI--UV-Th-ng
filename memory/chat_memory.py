@@ -1,5 +1,14 @@
-import streamlit as st
-from typing import List, Dict
+"""
+In-memory implementation of chat history storage
+
+This module provides a simple list-based storage
+suitable for testing, prototypes and short-lived sessions
+
+Data is lost on program restart
+"""
+
+from typing import List
+from domain import ChatMessage
 
 class ChatMemory:
     """
@@ -8,30 +17,27 @@ class ChatMemory:
     - Store chat history in memory
     - Provide methods to add and retrieve messages
     """
-    def __init__(self, storage: List[Dict[str, str]]):
+    def __init__(self, storage: List[ChatMessage]):
         """Initialize chat memory with storage"""
         self.storage = storage
 
-    def load_history(self) -> List[Dict[str, str]]:
+    def load_history(self) -> List[ChatMessage]:
         """Load chat history from storage"""
         return self.storage
 
-    def _add_message(self, role: str, content: str) -> Dict[str, str]:
-        """Format and append a message to the chat history"""
-        msg = {
-            "role": role,
-            "content": content
-        }
-        self.storage.append(msg)
-        return msg
+    def add_message(self, message: ChatMessage) -> None:
+        """Add a message to the chat history"""
+        self.storage.append(message)
     
     def add_user_message(self, content: str):
         """Add a user message to the chat history"""
-        self._add_message("user", content)
+        msg = ChatMessage(role="user", content=content)
+        self.add_message(msg)
     
     def add_bot_message(self, content: str):
         """Add a bot message to the chat history"""
-        self._add_message("assistant", content)
+        msg = ChatMessage(role="assistant", content=content)
+        self.add_message(msg)
 
     def clean_history(self):
         """Clear the chat history"""

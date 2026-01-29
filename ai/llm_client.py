@@ -1,3 +1,7 @@
+"""
+Protocol definition for LLM client implementations (Gemini, OpenAI, etc.)
+"""
+
 from typing import Protocol, List, Generator
 from domain import ChatMessage
 

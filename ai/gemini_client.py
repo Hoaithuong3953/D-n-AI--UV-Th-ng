@@ -1,10 +1,12 @@
+"""
+Gemini LLM client implementation and streaming helpers
+"""
+
 from typing import Generator, List, Dict, Any
 from google.api_core import exceptions as google_exceptions
 import google.generativeai as genai
 
-from utils.logger import logger
-from utils.exceptions import LLMServiceError, ValidationError
-from utils.retry import gemini_retry
+from utils import logger, LLMServiceError, ValidationError, gemini_retry
 from ai.llm_client import LLMClient
 from domain import ChatMessage
 
@@ -85,7 +87,7 @@ class GeminiClient:
     
     @staticmethod
     def _to_gemini_history(history: List[ChatMessage]) -> List[Dict[str, Any]]:
-        f"""
+        """
         Convert domain ChatMessage history into Gemini-compatible message objects
 
         Args:

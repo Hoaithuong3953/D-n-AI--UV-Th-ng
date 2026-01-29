@@ -1,3 +1,7 @@
+"""
+Prompt templates and system instructions used by the LearnPath Gemini-based assistant.
+"""
+
 from string import Template
 
 SYSTEM_PROMPT = """
@@ -42,7 +46,7 @@ YÊU CẦU QUAN TRỌNG:
             "topic": "Chủ đề tuần <số tuần>",
             "description": "Mô tả chi tiết những gì cần học trong tuần <số tuần>",
             "estimated_time": "Thời gian ước tính cho tuần <số tuần> (nếu có)",
-            "learning_objectives": ["Mục tiêu học tập (nếu có, danh sách các mục tiêu cần đạt trong tuần <số tuần>)],
+            "learning_objectives": ["Mục tiêu học tập (nếu có, danh sách các mục tiêu cần đạt trong tuần <số tuần>)"],
             "resources": [
                 {
                     "title": "Tên tài liệu",

@@ -1,3 +1,16 @@
+"""
+Domain models for personalized learning roadmaps and chat interactions
+
+This module defines the core business entities and value objects for learning path generation domain:
+- Resource: A single recommended learning material
+- Milestone: One week's learning goal with resources and objectives
+- Roadmap: Complete structured, personalized learning path
+- UserProfile: Input data from the learner to generate the roadmap
+- ChatMessage: Standardized message format for AI - user conversations
+
+All models enfoce domain invariants via Pydantic validation rules
+"""
+
 from pydantic import BaseModel, Field, field_validator, model_validator, ValidationInfo, HttpUrl
 from typing import List, Literal, Optional
 from datetime import datetime
@@ -25,7 +38,7 @@ class Milestone(BaseModel):
     """
     week: int = Field(..., ge=1, description="Week number in the roadmap (starting from 1)")
     topic: str = Field(..., max_length=200, description="Main topic covered in this week")
-    description: str = Field(...,max_length=1000, description="Detailed description of what will be learned in this week")
+    description: str = Field(..., max_length=1000, description="Detailed description of what will be learned in this week")
     resources: List[Resource] = Field(
         ...,
         min_length=1,
@@ -84,7 +97,7 @@ class UserProfile(BaseModel):
     """
     goal: str = Field(..., max_length=500, description="User's learning goal")
     current_level: str = Field(..., description="User's current skill level (e.g., 'beginner', 'intermediate', 'advanced')")
-    time_commitment:str = Field(..., description="Daily time user can commit to learning (e.g., 30 minutes, 2 hours)")
+    time_commitment: str = Field(..., description="Daily time user can commit to learning (e.g., 30 minutes, 2 hours)")
     learning_style: Optional[str] = Field(None, description="Learning style preference")
     background: Optional[str] = Field(None, description="Personal background/context")
     constraints: Optional[List[str]] = Field(None, description="User constraints (e.g., ['Free only', 'Weekends only'])")

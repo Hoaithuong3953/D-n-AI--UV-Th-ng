@@ -1,7 +1,14 @@
+"""
+Custom exception hierarchy, including base, LLM service, and validation-related errors
+"""
+
 from http import HTTPStatus
 from typing import Any, Optional, Dict
 
 class LearnPathException(Exception):
+    """
+    Base exception errors that carries a code, human-readable message and HTTP status code plus optional extra data
+    """
     code: str = "GENERAL_ERROR"
     message: str = "An unexpected error occurred"
     status_code: int = HTTPStatus.INTERNAL_SERVER_ERROR.value
@@ -34,11 +41,17 @@ class LearnPathException(Exception):
         return f"{self.code} ({self.status_code}): {self.message}"
 
 class LLMServiceError(LearnPathException):
+    """
+    Exception raised when communication with the underlying LLM service fails
+    """
     code = "LLM_SERVICE_ERROR"
     message = "Failed to communicate with the LLM service"
     status_code = HTTPStatus.BAD_REQUEST.value
 
 class ValidationError(LearnPathException):
+    """
+    Exception raised when input data or configuration fails validation
+    """
     code = "VALIDATION_ERROR"
     message = "Invalid input data provided"
     status_code = HTTPStatus.BAD_REQUEST.value

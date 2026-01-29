@@ -1,11 +1,26 @@
+"""
+Logging configuration helpers and shared logger instance
+"""
+
 import logging
 import logging.handlers
 import sys
 from pathlib import Path
 
-from config.settings import settings
+from config import settings
 
 def setup_logger(name: str = "learnpath-bot") -> logging.Logger:
+    """
+    Configure and return a named logger with console and optinal file output
+
+    Configuration is loaded from `settings`
+
+    Args:
+        name: Logger name defaults to 'learnpath-bot'
+
+    Returns:
+        Configured logging.Logger instance
+    """
     logger = logging.getLogger(name)
 
     if not logger.handlers:

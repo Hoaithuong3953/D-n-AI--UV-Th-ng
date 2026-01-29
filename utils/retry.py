@@ -1,3 +1,7 @@
+"""
+Retry helpers for external API calls
+"""
+
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type, before_sleep_log
 from google.api_core import exceptions as google_exceptions
 
@@ -11,6 +15,12 @@ TRANSIENT_ERRORS = (
 )
 
 def gemini_retry(max_retries: int = 3):
+    """
+    Build a tenacity retry decorator configured for transient Gemini API errors
+
+    Args:
+        max_retries: Maximum number of retry attempts before failing
+    """
     return retry(
         reraise=True,
         stop=stop_after_attempt(max_retries),

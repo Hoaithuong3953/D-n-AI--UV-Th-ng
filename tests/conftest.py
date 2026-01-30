@@ -3,7 +3,7 @@ Pytest fixtures for LearnPath chatbot tests
 """
 import pytest
 
-from domain.models import ChatMessage, UserProfile, Roadmap, Milestone, Resource
+from domain import ChatMessage, UserProfile, Roadmap, Milestone, Resource
 
 @pytest.fixture
 def sample_chat_message() -> ChatMessage:

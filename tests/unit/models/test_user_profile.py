@@ -4,7 +4,7 @@ Unit test for UserProfile model
 import pytest
 from pydantic import ValidationError
 
-from domain.models import UserProfile
+from domain import UserProfile
 
 class TestUserProfile:
     """Test for UserProfile model"""

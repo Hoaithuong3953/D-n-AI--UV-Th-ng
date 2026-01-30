@@ -4,7 +4,7 @@ Unit test for Milestone models
 import pytest
 from pydantic import ValidationError
 
-from domain.models import Milestone, Resource
+from domain import Milestone, Resource
 
 class TestMilestone:
     """Tests for Milestone model"""

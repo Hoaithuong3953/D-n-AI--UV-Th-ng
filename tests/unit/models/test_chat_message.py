@@ -5,7 +5,7 @@ import pytest
 from pydantic import ValidationError
 from datetime import datetime
 
-from domain.models import ChatMessage
+from domain import ChatMessage
 
 class TestChatMessage:
     """Tests for ChatMessage model"""

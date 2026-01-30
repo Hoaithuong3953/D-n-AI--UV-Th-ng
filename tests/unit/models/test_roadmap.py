@@ -5,11 +5,7 @@ import pytest
 from pydantic import ValidationError
 from datetime import datetime
 
-from domain.models import (
-    Roadmap, 
-    Milestone, 
-    Resource
-)
+from domain import Roadmap, Milestone, Resource
 
 class TestRoadmap:
     """Tests for Roadmap model"""

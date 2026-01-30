@@ -6,7 +6,7 @@ import os
 from unittest.mock import patch
 from pydantic import ValidationError
 
-from config.settings import Settings
+from config import Settings
 
 # Test constants
 VALID_GEMINI_API_KEY = "AIzaSy" + "a" * 30
@@ -255,7 +255,7 @@ class TestSettingsIntegration:
 
     def test_settings_can_be_imported(self):
         """Test that settings can be import from config module"""
-        from config.settings import settings
+        from config import settings
 
         assert settings is not None
         assert isinstance(settings, Settings)

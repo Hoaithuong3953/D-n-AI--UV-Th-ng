@@ -4,7 +4,7 @@ Unit test for Resource model
 import pytest
 from pydantic import ValidationError
 
-from domain.models import Resource
+from domain import Resource
 
 class TestResource:
     """Tests for Resource model"""

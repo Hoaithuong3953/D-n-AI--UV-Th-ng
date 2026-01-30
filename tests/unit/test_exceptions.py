@@ -4,11 +4,7 @@ Unit tests for LearnPath exceptions
 import pytest
 from http import HTTPStatus
 
-from utils.exceptions import (
-    LearnPathException,
-    LLMServiceError,
-    ValidationError
-)
+from utils import LearnPathException, LLMServiceError, ValidationError
 
 class TestLearnPathException:
     """

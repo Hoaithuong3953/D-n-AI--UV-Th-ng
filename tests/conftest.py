@@ -106,7 +106,7 @@ def sample_roadmap() -> Roadmap:
                     type="documentation"
                 )
             ]),
-            Milestone(week=1, topic="Functions and Modules", description="Học về functions và modules", resources=[
+            Milestone(week=2, topic="Functions and Modules", description="Học về functions và modules", resources=[
                 Resource(
                     title= "Python Functions",
                     url="https://docs.python.org/3/tutorial/controlflow.html",
@@ -120,7 +120,7 @@ def sample_roadmap() -> Roadmap:
                     type="documentation"
                 )
             ]),
-            Milestone(week=4, topic="Object-Oriented Programming", description="Classes và objectives", resources=[
+            Milestone(week=4, topic="Object-Oriented Programming", description="Classes và objects", resources=[
                 Resource(
                     title= "Python Classes",
                     url="https://docs.python.org/3/tutorial/classes.html",
@@ -147,7 +147,7 @@ def sample_roadmap_minimal() -> Roadmap:
                     type="documentation"
                 )
             ]),
-            Milestone(week=1, topic="Functions and Modules", description="Học về functions và modules", resources=[
+            Milestone(week=2, topic="Functions and Modules", description="Học về functions và modules", resources=[
                 Resource(
                     title= "Python Functions",
                     url="https://docs.python.org/3/tutorial/controlflow.html",

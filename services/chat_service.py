@@ -1,10 +1,9 @@
 from typing import Generator, List
 
-from utils.logger import logger
-from utils.exceptions import LLMServiceError
-from ai.llm_client import LLMClient
-from memory.chat_history import ChatHistory
-from domain.models import ChatMessage
+from utils import logger, LLMServiceError
+from ai import LLMClient
+from memory import ChatHistory
+from domain import ChatMessage
 
 class ChatService:
     """
@@ -55,7 +54,7 @@ class ChatService:
         Handle streaming errors and return user-friendly error messages
 
         Args:
-            error: The exception that occured during streaming
+            error: The exception that occurred during streaming
             error_type: Type of error for routing
 
         Returns:
@@ -73,7 +72,7 @@ class ChatService:
         Handle the LLM streaming lifecycle: load history, stream response, save result
 
         Args:
-            user_input: The user's message that trigged that response
+            user_input: The user's message that triggered that response
 
         Yields:
             str: Chunks of the AI-generated response as they arrive

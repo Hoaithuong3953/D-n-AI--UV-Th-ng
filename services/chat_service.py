@@ -4,22 +4,30 @@ from utils import logger, LLMServiceError
 from ai import LLMClient
 from memory import ChatHistory
 from domain import ChatMessage
+from .session_manager import SessionManager
 
 class ChatService:
     """
-    Service Layer for Chat Operations.
-    Responsibility: Isolate the UI from the complexity of managing AI state and API calls.
+    Service Layer for Chat Operations
+    Responsibility: 
+    - Isolate the UI from the complexity of managing AI state and API calls
+    - Apply business rules around input validation, context window and error handling
     """
-    def __init__(self, ai_client: LLMClient, history: ChatHistory):
+
+    MAX_INPUT_LENGTH = 2000
+
+    def __init__(self, ai_client: LLMClient, history: ChatHistory, session: SessionManager):
         """
-        Initialize ChatService with AI client and memory storage
+        Initialize ChatService with required dependencies
 
         Args:
             ai_client: LLM Client implementation
             history: Chat history storage
+            session: Manages the lifetime of the current chat session
         """
         self.ai = ai_client
         self.history = history
+        self.session = session
 
     def process_message(self, user_input: str) -> Generator[str, None, None]:
         """
@@ -38,11 +46,18 @@ class ChatService:
             yield "Vui lòng nhập nội dung tin nhắn."
             return
         
-        MAX_INPUT_LENGTH = 2000
-        if len(user_input) > MAX_INPUT_LENGTH:
+        if len(user_input) > self.MAX_INPUT_LENGTH:
             logger.warning(f"Input too long: {len(user_input)} chars")
-            yield f"Tin nhắn quá dài. Vui lòng giới hạn trong {MAX_INPUT_LENGTH} kí tự"
+            yield f"Tin nhắn quá dài. Vui lòng giới hạn trong {self.MAX_INPUT_LENGTH} kí tự"
             return
+        
+        if self.session.is_expired():
+            logger.info("Session expired due to inactivity. Resetting history")
+            self.history.clean_history()
+            self.session.reset()
+            yield "Phiên làm việc đã hết hạn do không hoạt động. Đã bắt đầu phiên mới"
+
+        self.session.touch_activity()
 
         user_message = ChatMessage(role="user", content=user_input)
         self.history.add_message(user_message)

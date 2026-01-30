@@ -28,3 +28,12 @@ class ChatHistory(Protocol):
         to prevent accidental modification of internal storage
         """
         ...
+    
+    def clean_history(self):
+        """Remove all messages from the current conversation history
+        
+        Used when:
+        - User starts a new conversation
+        - Session is being reset
+        """
+        ...

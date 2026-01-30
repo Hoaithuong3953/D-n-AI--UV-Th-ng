@@ -1,9 +1,13 @@
+"""
+Streamlit entrypoint for the LearnPath chatbot user interface
+"""
+
 import streamlit as st
 
-from config.settings import settings
+from config import settings
 from ai import GeminiClient, SYSTEM_PROMPT
-from memory.chat_memory import ChatMemory
-from services.chat_service import ChatService
+from memory import ChatMemory
+from services import ChatService
 
 def build_chat_service() -> ChatService:
     ai_client = GeminiClient(

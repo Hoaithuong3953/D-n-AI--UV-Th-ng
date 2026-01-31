@@ -2,8 +2,17 @@
 Pytest fixtures for LearnPath chatbot tests
 """
 import pytest
+from unittest.mock import MagicMock, patch
 
 from domain import ChatMessage, UserProfile, Roadmap, Milestone, Resource
+
+@pytest.fixture
+def mock_genai_model():
+    """Mock google.generativeai for GeminiClient tests"""
+    with patch("ai.gemini_client.genai.GenerativeModel") as mock_model_cls, patch("ai.gemini_client.genai.configure",) as mock_configure:
+        mock_instance = MagicMock()
+        mock_model_cls.return_value = mock_instance
+        yield mock_model_cls, mock_instance, mock_configure
 
 @pytest.fixture
 def sample_chat_message() -> ChatMessage:

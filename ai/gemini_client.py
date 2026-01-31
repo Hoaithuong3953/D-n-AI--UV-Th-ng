@@ -30,10 +30,10 @@ class GeminiClient:
             model_name: Gemini model name
 
         Raises:
-            ValidationError: If api_key or model_name is invalid
+            ValidationError: If api_key, model_name or system_prompt is invalid
             LLMServiceError: If SDK initialization fails unexpectedly
         """
-        self._validate_config(api_key, model_name)
+        self._validate_config(api_key, model_name, system_prompt)
 
         self.api_key = api_key
         self.model_name = model_name
@@ -43,7 +43,7 @@ class GeminiClient:
 
         self.model = self._init_model()
         
-    def _validate_config(self, api_key: str, model_name: str) -> None:
+    def _validate_config(self, api_key: str, model_name: str, system_prompt: str) -> None:
         """
         Validate config before initializing the SDK
 
@@ -55,6 +55,9 @@ class GeminiClient:
         
         if not model_name or not model_name.strip():
             raise ValidationError(message="Gemini model name must not be empty")
+        
+        if not system_prompt or not system_prompt.strip():
+            raise ValidationError(message="System prompt must not be empty")
         
     def _init_model(self):
         """

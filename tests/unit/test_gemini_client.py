@@ -28,6 +28,17 @@ def test_validate_config_rejects_empty_model_name():
             system_prompt="dummy-prompt"
         )
 
+def test_validate_config_rejects_empty_system_prompt():
+    """Constructor should raise ValidationError when system_prompt is empty or whitespace"""
+    with pytest.raises(ValidationError):
+        GeminiClient(
+            api_key="dummy-key",
+            model_name="dummy-model",
+            request_timeout=30,
+            stream_timeout=30,
+            system_prompt="   "
+        )
+
 def test_init_model_configures_genai_and_uses_system_prompt(mock_genai_model):
     """genai.configure and GenerativeModel should receive api_key, model_name and system_instruction"""
     model_cls, _, mock_configure = mock_genai_model

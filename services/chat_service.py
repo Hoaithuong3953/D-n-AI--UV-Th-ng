@@ -15,6 +15,7 @@ class ChatService:
     """
 
     MAX_INPUT_LENGTH = 2000
+    MAX_CONTEXT_MESSAGES = 20
 
     def __init__(self, ai_client: LLMClient, history: ChatHistory, session: SessionManager):
         """
@@ -97,7 +98,12 @@ class ChatService:
             history_context = raw_history[:-1]
         else:
             history_context = []
-            logger.info("No previous history, starting fresh conversation")
+
+        if len(history_context) > self.MAX_CONTEXT_MESSAGES:
+            history_context = history_context[-self.MAX_CONTEXT_MESSAGES :]
+
+        if not history_context:
+            logger.info("No usable history context for this request")
 
         logger.info(f"Processing chat. Context length: {len(history_context)}")
 

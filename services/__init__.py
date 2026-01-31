@@ -5,5 +5,9 @@ Provides high-level service implementations that orchestrate AI clients and memo
 """
 
 from .chat_service import ChatService
+from .session_manager import SessionManager
 
-__all__ = ["ChatService"]
+__all__ = [
+    "ChatService", 
+    "SessionManager",
+    ]

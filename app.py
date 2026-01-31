@@ -7,7 +7,7 @@ import streamlit as st
 from config import settings
 from ai import GeminiClient, SYSTEM_PROMPT
 from memory import ChatMemory
-from services import ChatService
+from services import ChatService, SessionManager
 
 def build_chat_service() -> ChatService:
     ai_client = GeminiClient(
@@ -18,7 +18,8 @@ def build_chat_service() -> ChatService:
         system_prompt=SYSTEM_PROMPT
     )
     history = ChatMemory(storage=[])
-    return ChatService(ai_client=ai_client, history=history)
+    session = SessionManager(timeout_minutes=30)
+    return ChatService(ai_client=ai_client, history=history, session=session)
 
 st.set_page_config(page_title="LearnPath Chatbot", layout="centered")
 st.title("LearnPath Chatbot")

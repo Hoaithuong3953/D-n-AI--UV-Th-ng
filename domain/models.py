@@ -1,19 +1,20 @@
 """
+models.py
+
 Domain models for personalized learning roadmaps and chat interactions
 
-This module defines the core business entities and value objects for learning path generation domain:
-- Resource: A single recommended learning material
-- Milestone: One week's learning goal with resources and objectives
-- Roadmap: Complete structured, personalized learning path
-- UserProfile: Input data from the learner to generate the roadmap
-- ChatMessage: Standardized message format for AI - user conversations
-
-All models enfoce domain invariants via Pydantic validation rules
+Key features:
+- Resource, Milestone, Roadmap: learning path structure and validation
+- UserProfile: learner input for roadmap generation
+- ChatMessage: standardized message format for AI-user conversation
+- Intent: user intent classification for routing chat and roadmap flow
+- Pydantic validation for domain invariants (sequential weeks, duration_week match, etc.)
 """
 
 from pydantic import BaseModel, Field, field_validator, model_validator, ValidationInfo, HttpUrl
 from typing import List, Literal, Optional
 from datetime import datetime
+from enum import Enum
 
 class Resource(BaseModel):
     """
@@ -33,8 +34,7 @@ class Resource(BaseModel):
 
 class Milestone(BaseModel):
     """
-    Represents a weekly milestone in the learning roadmap
-    Each milestone covers a specific topic with description and recommended resources
+    Represents a weekly milestone in the learning roadmap (topic, description, resources)
     """
     week: int = Field(..., ge=1, description="Week number in the roadmap (starting from 1)")
     topic: str = Field(..., max_length=200, description="Main topic covered in this week")
@@ -49,7 +49,7 @@ class Milestone(BaseModel):
 
 class Roadmap(BaseModel):
     """
-    Complete personalize learning roadmap generated for a user
+    Complete personalized learning roadmap generated for a user
     """
     topic: str = Field(..., max_length=200, description="Overall main topic of the learning path")
     title: Optional[str] = Field(None, max_length=200, description="Display title (auto-set to topic if not provided)")
@@ -100,9 +100,12 @@ class UserProfile(BaseModel):
     time_commitment: str = Field(..., description="Daily time user can commit to learning (e.g., 30 minutes, 2 hours)")
     learning_style: Optional[str] = Field(None, description="Learning style preference")
     background: Optional[str] = Field(None, description="Personal background/context")
-    constraints: Optional[List[str]] = Field(None, description="User constraints (e.g., ['Free only', 'Weekends only'])")
+    constraints: Optional[List[str]] = Field(None, description="Điều kiện/hạn chế của người học (vd: ['Chỉ tài liệu miễn phí', 'Chỉ cuối tuần'])")
 
 class ChatMessage(BaseModel):
+    """
+    Single message in a chat conversation (role, content, timestamp)
+    """
     role: Literal["system", "user", "assistant"] = Field(
         ..., 
         description="Message role: 'system', 'user' or 'assistant'"
@@ -112,3 +115,10 @@ class ChatMessage(BaseModel):
         default_factory=datetime.now,
         description="Timestamp when the message was created"
     )
+
+class Intent(Enum):
+    """
+    User intent classification for routing chat and roadmap flow
+    """
+    CHAT = "chat"
+    ROADMAP = "roadmap"

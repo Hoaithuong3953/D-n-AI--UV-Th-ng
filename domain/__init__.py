@@ -1,8 +1,9 @@
 """
-Domain layer for learnpath_chatbot
+Domain layer for LearnPath chatbot
 
-Contains core logic and domain models
-Independent of application and infrastructure layers
+Key features:
+- Re-export Resource, Milestone, Roadmap, UserProfile, ChatMessage, Intent from models
+- Independent of application and infrastructure layers
 """
 
 from .models import (
@@ -10,7 +11,8 @@ from .models import (
     Milestone,
     Roadmap,
     UserProfile,
-    ChatMessage
+    ChatMessage,
+    Intent
 )
 
 __all__ = [
@@ -18,5 +20,6 @@ __all__ = [
     "Milestone",
     "Roadmap",
     "UserProfile",
-    "ChatMessage"
+    "ChatMessage",
+    "Intent"
 ]

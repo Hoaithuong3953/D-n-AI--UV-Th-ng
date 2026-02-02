@@ -1,16 +1,22 @@
 """
+session_manager.py
+
 Session manager for tracking user activity and session expiration
 
-This module provides a lightweight, in-memory SessionManager class to:
-- Track the last user activity timestamp
-- Determine if a session has timed out due to inactivity
-- Support simple reset functionality
+Key features:
+- Track last activity timestamp; check if session expired due to inactivity
+- touch_activity, is_expired, reset for lightweight in-memory session
 """
 from datetime import datetime, timedelta
 
 class SessionManager:
     """
-    Manage session lifetime based on user activity
+    Manage session lifetime based on user activity (in-memory)
+
+    Responsibilities:
+    - touch_activity: record current time as last activity
+    - is_expired: true when inactivity exceeds timeout
+    - reset: clear last activity (e.g. new session)
     """
     def __init__(self, timeout_minutes: int = 30):
         """
@@ -28,11 +34,7 @@ class SessionManager:
         self._last_activity = datetime.now()
 
     def is_expired(self) -> bool:
-        """Check if the current session has expired based on inactivity
-        
-        Returns:
-            True if no activity has occurred for longer than the timeout period
-        """
+        """Return True if the session has expired due to inactivity (no activity for timeout period)"""
         if self._last_activity is None:
             return False
         return datetime.now() - self._last_activity > self.timeout
@@ -40,3 +42,11 @@ class SessionManager:
     def reset(self) -> None:
         """Reset the session to its initial state"""
         self._last_activity = None
+
+    def get_last_activity(self):
+        """Return the last activity datetime (for session persistence) or None"""
+        return self._last_activity
+    
+    def set_last_activity(self, value: datetime | None) -> None:
+        """Restore the last activity (e.g. from session_state)"""
+        self._last_activity = value

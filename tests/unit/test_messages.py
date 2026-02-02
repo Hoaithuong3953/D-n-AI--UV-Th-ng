@@ -17,6 +17,12 @@ class TestMessageKey:
     EXPECTED_MESSAGE_KEYS = {
         "LLM_ERROR": "llm_error",
         "UNEXPECTED_ERROR": "unexpected_error",
+
+        "EMPTY_INPUT": "empty_input",
+        "INPUT_TOO_LONG": "input_too_long",
+        "SESSION_EXPIRED": "session_expired",
+
+        "THINKING": "thinking",
     }
     
     def test_every_message_key_has_expected_value(self):
@@ -37,6 +43,22 @@ class TestMessageKey:
 
 class TestDefaultMessageProvider:
     """DefaultMessageProvider get/format"""
+    def test_get_returns_extract_template_for_empty_input(self):
+        """get(EMPTY_INPUT) returns correct template"""
+        provider = DefaultMessageProvider()
+        assert provider.get(MessageKey.EMPTY_INPUT) == "Vui lòng nhập nội dung tin nhắn."
+
+    def test_format_input_too_long_substitutes_max(self):
+        """format(INPUT_TOO_LONG, max=...) substitutes {max} correctly"""
+        provider = DefaultMessageProvider()
+        assert provider.format(MessageKey.INPUT_TOO_LONG, max="500") == (
+            "Tin nhắn quá dài. Vui lòng giới hạn trong 500 kí tự."
+        )
+
+    def test_format_without_kwargs_returns_same_as_get(self):
+        """format(key) without kwargs returns same string as get(key)"""
+        provider = DefaultMessageProvider()
+        assert provider.format(MessageKey.THINKING) == provider.get(MessageKey.THINKING)
 
     def test_all_message_keys_have_non_empty_template(self):
         """Every MessageKey has a template in DefaultMessageProvider"""
@@ -56,3 +78,7 @@ class TestDefaultMessageProvider:
             assert default_messages.get(key) == fresh.get(key), (
                 f"default_messages.get({key!r}) differs from fresh provider"
             )
+
+    def test_default_messages_get_returns_thinking_text(self):
+        """default_messages.get(THINKING) returns the correct thinking text"""
+        assert default_messages.get(MessageKey.THINKING) == "Đang suy nghĩ..."

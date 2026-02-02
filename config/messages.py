@@ -17,6 +17,14 @@ class MessageKey(str, Enum):
     LLM_ERROR = "llm_error"
     UNEXPECTED_ERROR = "unexpected_error"
 
+    # Validation
+    EMPTY_INPUT = "empty_input"
+    INPUT_TOO_LONG = "input_too_long"
+    SESSION_EXPIRED = "session_expired"
+    
+    # UI state
+    THINKING = "thinking"
+
 class MessageProvider(Protocol):
     """Protocol for message provider"""
     def get(self, key: MessageKey) -> str:
@@ -39,6 +47,12 @@ class DefaultMessageProvider:
     _TEMPLATES: dict[MessageKey, str] = {
         MessageKey.LLM_ERROR: "Không thể kết nối hoặc tải tin nhắn. Vui lòng thử lại sau.",
         MessageKey.UNEXPECTED_ERROR: "Đã xảy ra lỗi không mong muốn. Vui lòng thử lại sau.",
+
+        MessageKey.EMPTY_INPUT: "Vui lòng nhập nội dung tin nhắn.",
+        MessageKey.INPUT_TOO_LONG: "Tin nhắn quá dài. Vui lòng giới hạn trong {max} kí tự.",
+        MessageKey.SESSION_EXPIRED: "Phiên làm việc đã hết hạn do không hoạt động. Vui lòng làm mới trang để tiếp tục.",
+
+        MessageKey.THINKING: "Đang suy nghĩ...",
     }
 
     def get(self, key: MessageKey) -> str:

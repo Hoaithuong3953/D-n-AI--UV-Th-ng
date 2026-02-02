@@ -1,17 +1,37 @@
-from typing import Generator, List
+"""
+chat_service.py
+
+Chat service layer for LearnPath chatbot. Handles user messages: validation, session,
+streaming LLM response, history persistence and error handling
+
+Key features:
+- Input validation and session expiry; context window limit
+- Streaming response and history persistence
+- User-facing error messages on LLM/session failure
+"""
+from typing import Generator, List, Union
+from dataclasses import dataclass
 
 from utils import logger, LLMServiceError
 from ai import LLMClient
 from memory import ChatHistory
 from domain import ChatMessage
+from config import MessageKey
 from .session_manager import SessionManager
+
+@dataclass(frozen=True)
+class StreamError:
+    """Stream error result; Application resolves key to user message"""
+    key: MessageKey
 
 class ChatService:
     """
-    Service Layer for Chat Operations
-    Responsibility: 
-    - Isolate the UI from the complexity of managing AI state and API calls
-    - Apply business rules around input validation, context window and error handling
+    Process user chat messages and stream AI responses with session and history
+
+    Responsibilities:
+    - Isolate UI from AI state and API calls
+    - Apply business rules (input validation, context window, session expiry)
+    - Stream response and persist history; surface user-friendly errors
     """
 
     MAX_INPUT_LENGTH = 2000
@@ -22,9 +42,9 @@ class ChatService:
         Initialize ChatService with required dependencies
 
         Args:
-            ai_client: LLM Client implementation
-            history: Chat history storage
-            session: Manages the lifetime of the current chat session
+            ai_client: LLM client implementation (generate_text, stream_chat)
+            history: Chat history storage (add_message, load_history, clean_history)
+            session: Manages lifetime of the current chat session (touch_activity, is_expired, reset)
         """
         self.ai = ai_client
         self.history = history
@@ -32,13 +52,16 @@ class ChatService:
 
     def process_message(self, user_input: str) -> Generator[str, None, None]:
         """
-        Processing a user's chat message and stream the AI response
+        Process a user chat message and stream the AI response
+
+        Validates input length and session; appends message to history then streams
+        chunks from the LLM. Errors are yielded as user-facing messages
 
         Args:
-            user_input: The user's message text
+            user_input: Raw message text from the user
 
         Yields:
-            str: Chunks of the AI response as they are generated
+            Chunks of the AI response, or an error message string on failure
         """
         user_input = user_input.strip()
 
@@ -65,25 +88,15 @@ class ChatService:
 
         yield from self._stream_response(user_input)
 
-    def _handle_stream_error(self, error: Exception, error_type: str) -> str:
-        """
-        Handle streaming errors and return user-friendly error messages
-
-        Args:
-            error: The exception that occurred during streaming
-            error_type: Type of error for routing
-
-        Returns:
-            str: User-friendly error message formatted for display
-        """
-        if error_type == "llm_service":
+    def _stream_error_key(self, error: Exception) -> MessageKey:
+        """Map streaming exception to MessageKey error code"""
+        if isinstance(error, LLMServiceError):
             logger.error(f"AI Service error: {error}")
-            return "\n\n[Lỗi kết nối: Không thể tải toàn bộ tin nhắn, vui lòng thử lại]"
-        else:
-            logger.error(f"Unexpected Chat Error: {error}")
-            return "\n\n[Lỗi hệ thống: Đã xảy ra sự cố không mong muốn]"
+            return MessageKey.LLM_ERROR
+        logger.error(f"Unexpected Chat Error: {error}")
+        return MessageKey.UNEXPECTED_ERROR
 
-    def _stream_response(self, user_input: str) -> Generator[str, None, None]:
+    def _stream_response(self, user_input: str) -> Generator[Union[str, StreamError], None, None]:
         """
         Handle the LLM streaming lifecycle: load history, stream response, save result
 
@@ -121,15 +134,13 @@ class ChatService:
                 yield chunk
 
         except LLMServiceError as e:
-            error_message = self._handle_stream_error(e, "llm_service")
-            full_response += error_message
-            yield error_message
+            error_key = self._stream_error_key(e)
+            yield StreamError(key=error_key)
             error_occurred = True
 
         except Exception as e:
-            error_message = self._handle_stream_error(e, "unexpected")
-            full_response += error_message
-            yield error_message
+            error_key = self._stream_error_key(e)
+            yield StreamError(key=error_key)
             error_occurred = True
 
         finally:

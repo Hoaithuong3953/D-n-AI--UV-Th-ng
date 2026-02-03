@@ -15,6 +15,7 @@ class MessageKey(str, Enum):
     """Keys for user-facing messages; use with MessageProvider.get or .format"""
     # Errors
     LLM_ERROR = "llm_error"
+    LLM_STREAM_INTERRUPTED = "llm_stream_interrupted"
     UNEXPECTED_ERROR = "unexpected_error"
 
     # Validation
@@ -46,6 +47,7 @@ class DefaultMessageProvider:
 
     _TEMPLATES: dict[MessageKey, str] = {
         MessageKey.LLM_ERROR: "Không thể kết nối hoặc tải tin nhắn. Vui lòng thử lại sau.",
+        MessageKey.LLM_STREAM_INTERRUPTED: "\n\nKết nối bị gián đoạn. Câu trả lời phía trên chưa hoàn chỉnh. Vui lòng hỏi lại để nhận câu trả lời đầy đủ.",
         MessageKey.UNEXPECTED_ERROR: "Đã xảy ra lỗi không mong muốn. Vui lòng thử lại sau.",
 
         MessageKey.EMPTY_INPUT: "Vui lòng nhập nội dung tin nhắn.",

@@ -67,28 +67,43 @@ class ChatService:
         
         for attempt in range(1, max_attempts + 1):
             try: 
-                first = True
+                chunk_received = False
                 stream_generation = self.llm.stream_chat(
                     history=history,
                     new_message=user_input
                 )
 
                 for chunk in stream_generation:
-                    if first:
+                    if not chunk_received:
                         logger.info("Chat first chunk received")
-                        first = False
+                    chunk_received = True
                     yield chunk
-                if not first:
+                
+                if chunk_received:
                     logger.info("Chat stream end")
                     return
+                else:
+                    logger.warning(f"Chat stream attempt {attempt}: no chunks received")
+                    if attempt >= max_attempts:
+                        yield StreamError(key=MessageKey.LLM_ERROR)
+                        return
+                        
             except LLMServiceError as e:
                 is_quota = "429" in str(e) or "quota" in str(e).lower()
                 if is_quota or attempt >= max_attempts:
                     yield StreamError(key=self._stream_error_key(e))
                     return
-                logger.warning(f"Chat stream attempt {attempt} failed, retrying: {e}")
+                if chunk_received:
+                    logger.error(f"Chat stream failed mid-stream (attempt {attempt}): {e}")
+                    yield StreamError(key=MessageKey.LLM_STREAM_INTERRUPTED)
+                    return
+                logger.warning(f"Chat stream attempt {attempt} failed before any chunks, retrying: {e}")
             except Exception as e:
                 if attempt >= max_attempts:
                     yield StreamError(key=self._stream_error_key(e))
                     return
-                logger.warning(f"Chat stream attempt {attempt} failed, retrying: {e}")
+                if chunk_received:
+                    logger.error(f"Chat stream failed mid-stream (attempt {attempt}): {e}")
+                    yield StreamError(key=MessageKey.LLM_STREAM_INTERRUPTED)
+                    return
+                logger.warning(f"Chat stream attempt {attempt} failed before any chunks, retrying: {e}")

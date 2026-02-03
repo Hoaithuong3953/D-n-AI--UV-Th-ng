@@ -16,6 +16,7 @@ class TestMessageKey:
 
     EXPECTED_MESSAGE_KEYS = {
         "LLM_ERROR": "llm_error",
+        "LLM_STREAM_INTERRUPTED": "llm_stream_interrupted",
         "UNEXPECTED_ERROR": "unexpected_error",
 
         "EMPTY_INPUT": "empty_input",

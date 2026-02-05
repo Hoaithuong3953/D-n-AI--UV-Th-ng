@@ -22,8 +22,19 @@ class TestMessageKey:
         "EMPTY_INPUT": "empty_input",
         "INPUT_TOO_LONG": "input_too_long",
         "SESSION_EXPIRED": "session_expired",
+        "FILL_PROFILE": "fill_profile",
 
         "THINKING": "thinking",
+
+        "PROFILE_ANALYZING": "profile_analyzing",
+        "PROFILE_EXTRACTED": "profile_extracted",
+
+        "ROADMAP_LOADING": "roadmap_loading",
+        "ROADMAP_CREATED": "roadmap_created",
+        "ROADMAP_ERROR": "roadmap_error",
+        "ROADMAP_INVALID_JSON": "roadmap_invalid_json",
+        "ROADMAP_INVALID_SCHEMA": "roadmap_invalid_schema",
+        "ROADMAP_GENERATION_FAILED": "roadmap_generation_failed",
     }
     
     def test_every_message_key_has_expected_value(self):
@@ -54,6 +65,19 @@ class TestDefaultMessageProvider:
         provider = DefaultMessageProvider()
         assert provider.format(MessageKey.INPUT_TOO_LONG, max="500") == (
             "Tin nhắn quá dài. Vui lòng giới hạn trong 500 kí tự."
+        )
+
+    def test_format_profile_extracted_substitutes_goal_level_time(self):
+        """format(PROFILE_EXTRACTED, goal=..., level=..., time=...) substitutes correctly"""
+        provider = DefaultMessageProvider()
+        formatted_message = provider.format(
+            MessageKey.PROFILE_EXTRACTED,
+            goal="Học lập trình Python",
+            level="Người mới bắt đầu",
+            time="6 tháng"
+        )
+        assert formatted_message == (
+            "Đã trích xuất thông tin hồ sơ: mục tiêu Học lập trình Python, trình độ Người mới bắt đầu, thời gian học 6 tháng."
         )
 
     def test_format_without_kwargs_returns_same_as_get(self):

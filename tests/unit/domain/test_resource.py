@@ -1,5 +1,7 @@
 """
-Unit test for Resource model
+test_resource.py
+
+Unit tests for Resource model (title, url, type, difficulty, validation)
 """
 import pytest
 from pydantic import ValidationError
@@ -8,8 +10,9 @@ from domain import Resource
 
 class TestResource:
     """Tests for Resource model"""
+
     def test_create_resource_minimal(self):
-        """Test creating a valid resource with minimal fields"""
+        """Resource with minimal required fields is valid"""
         resource = Resource(
             title="Python Tutorial",
             url="https://example.com/python",
@@ -23,7 +26,7 @@ class TestResource:
         assert resource.difficulty is None
 
     def test_create_resource_full(self):
-        """Test creating a resource with all fields"""
+        """Resource with all fields (description, difficulty) is valid"""
         resource = Resource(
             title="Python Crash Course",
             url="https://example.com/crash-course",
@@ -36,7 +39,7 @@ class TestResource:
         assert resource.difficulty == "beginner"
 
     def test_resource_url_validation(self):
-        """Test that url must be valid HttpUrl"""
+        """url must be valid HttpUrl; invalid raises ValidationError"""
         # Valid URL
         resource = Resource(
             title="Test",
@@ -55,7 +58,7 @@ class TestResource:
             )
 
     def test_resource_type_literal(self):
-        """Test that resource type must be valid literal"""
+        """type must be one of video, article, book, course, practice, project, documentation"""
         # Valid types
         valid_types = ["video", "article", "book", "course", "practice", "project", "documentation"]
         for resource_type in valid_types:
@@ -75,7 +78,7 @@ class TestResource:
             )
 
     def test_resource_difficulty_literal(self):
-        """Test that difficulty must be valid literal if provided"""
+        """difficulty if provided must be beginner, intermediate, or advanced; invalid raises ValidationError"""
         # Valid difficulties
         valid_difficulties = ["beginner", "intermediate", "advanced"]
         for difficulty in valid_difficulties:
@@ -98,7 +101,7 @@ class TestResource:
             )
 
     def test_resource_title_max_length(self):
-        """Test that title max_length constraint is enforced"""
+        """title max_length (200) is enforced; excess raises ValidationError"""
         # Valid length
         resource = Resource(
             title="A" * 200,

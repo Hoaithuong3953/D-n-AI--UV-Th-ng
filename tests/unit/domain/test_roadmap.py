@@ -1,5 +1,7 @@
 """
-Unit test for Roadmap model
+test_roadmap.py
+
+Unit tests for Roadmap model (topic, title, duration_week, milestones, validation)
 """
 import pytest
 from pydantic import ValidationError
@@ -11,7 +13,7 @@ class TestRoadmap:
     """Tests for Roadmap model"""
 
     def test_create_roadmap_minimal(self):
-        """Test creating a valid roadmap with minimal fields"""
+        """Roadmap with minimal required fields is valid"""
         roadmap = Roadmap(
             topic="Learn Python",
             duration_week=1,
@@ -29,7 +31,7 @@ class TestRoadmap:
         assert isinstance(roadmap.created_at, datetime)
 
     def test_create_roadmap_full(self):
-        """Test creating roadmap with all fields"""
+        """Roadmap with all fields (title, description, prerequisites) is valid"""
         roadmap = Roadmap(
             topic="Learn Python",
             title="Python Learning Path",
@@ -51,7 +53,7 @@ class TestRoadmap:
         assert len(roadmap.prerequisites) == 1
 
     def test_roadmap_auto_set_title(self):
-        """Test that title is auto-set to topic if not provided"""
+        """title is auto-set to topic when not provided; provided title is kept"""
         # Title not provided
         roadmap = Roadmap(
             topic="Learn Python",
@@ -78,7 +80,7 @@ class TestRoadmap:
         assert roadmap2.title == "Custom title"
 
     def test_roadmap_sequential_weeks(self):
-        """Test that weeks must be sequential starting from 1"""
+        """milestone weeks must be sequential from 1; mismatch raises ValidationError"""
         # Valid: Sequential weeks
         roadmap = Roadmap(
             topic="Test",
@@ -129,7 +131,7 @@ class TestRoadmap:
             )
     
     def test_roadmap_milestone_count_matches_duration(self):
-        """Test that number of milestones must match duration_week"""
+        """Number of milestones must match duration_week; mismatch raises ValidationError"""
         # Valid: Count matches
         roadmap = Roadmap(
             topic="Test",
@@ -168,7 +170,7 @@ class TestRoadmap:
         assert "must match duration_week" in str(exc_info.value)
 
     def test_roadmap_duration_week_validation(self):
-        """Test that duration_week must be >= 1"""
+        """duration_week must be >= 1; invalid raises ValidationError"""
         # Valid duration
         roadmap = Roadmap(
             topic="Test",
@@ -194,7 +196,7 @@ class TestRoadmap:
             )
 
     def test_roadmap_milestones_min_length(self):
-        """Test that milestones list must be have at least 1 item"""
+        """milestones list must have at least 1 item; empty raises ValidationError"""
         # Valid: 1 milestone
         roadmap = Roadmap(
             topic="Test",

@@ -1,5 +1,7 @@
 """
-Unit test for UserProfile model
+test_user_profile.py
+
+Unit tests for UserProfile model (goal, current_level, time_commitment, optional fields, validation)
 """
 import pytest
 from pydantic import ValidationError
@@ -7,8 +9,10 @@ from pydantic import ValidationError
 from domain import UserProfile
 
 class TestUserProfile:
-    """Test for UserProfile model"""
+    """Tests for UserProfile model"""
+
     def test_create_user_profile_minimal(self):
+        """UserProfile with minimal required fields (goal, current_level, time_commitment) is valid"""
         profile = UserProfile(
             goal="Learn Python",
             current_level="beginner",
@@ -36,7 +40,7 @@ class TestUserProfile:
         assert len(profile.constraints) == 2
 
     def test_user_profile_goal_max_length(self):
-        """Test that goal max_length constraint is enforced"""
+        """goal max_length (500) is enforced; excess raises ValidationError"""
         # Valid length
         profile = UserProfile(
             goal="A"*500,

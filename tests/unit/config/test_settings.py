@@ -1,5 +1,7 @@
 """
-Unit test for Settings configuration
+test_settings.py
+
+Unit tests for Settings configuration (defaults, env loading, validation, integration)
 """
 import pytest
 import os
@@ -12,10 +14,10 @@ from config import Settings
 VALID_GEMINI_API_KEY = "AIzaSy" + "a" * 30
 
 class TestSettingsFields:
-    """Test settings default values and required fields"""
-    
+    """Tests for settings default values and required fields"""
+
     def test_default_values(self):
-        """Test that Settings has correct default value when env vars not set"""
+        """Settings has correct defaults when env vars not set"""
         with patch.dict(os.environ, {"GEMINI_API_KEY": VALID_GEMINI_API_KEY}):
             settings = Settings(_env_file=None)
 
@@ -30,7 +32,7 @@ class TestSettingsFields:
             assert settings.LOG_FILE_RETENTION == 7
 
     def test_required_api_key(self):
-        """Test that GEMINI_API_KEY is required"""
+        """GEMINI_API_KEY is required (missing raises ValidationError)"""
         with patch.dict(os.environ, {}, clear=True):
             with pytest.raises(ValidationError) as exc_info:
                 Settings(_env_file=None)
@@ -41,11 +43,11 @@ class TestSettingsFields:
                 for error in errors
             )
 
-class TestSettingsFromEvironment:
-    """Test settings loading from environment variables"""
+class TestSettingsFromEnvironment:
+    """Tests for settings loading from environment variables"""
 
     def test_load_model(self):
-        """Test loading model settings from environment"""
+        """Settings loads model settings from environment"""
         env_vars = {
             "GEMINI_API_KEY": VALID_GEMINI_API_KEY,
             "GEMINI_MODEL": "gemini-2.5-pro"
@@ -57,7 +59,7 @@ class TestSettingsFromEvironment:
             assert settings.GEMINI_MODEL == "gemini-2.5-pro"
 
     def test_load_logging(self):
-        """Test loading logging settings from environment"""
+        """Settings loads logging settings from environment"""
         env_vars = {
             "GEMINI_API_KEY": VALID_GEMINI_API_KEY,
             "LOG_LEVEL": "DEBUG",
@@ -72,10 +74,10 @@ class TestSettingsFromEvironment:
             assert settings.LOG_FILE_PATH == "custom/logs/app.log"
 
 class TestSettingsFieldValidation:
-    """Test settings field validation from .env"""
+    """Tests for settings field validation from .env"""
 
     def test_gemini_api_key_empty_string_validation(self):
-        """Test that empty GEMINI_API_KEY is rejected"""
+        """Empty GEMINI_API_KEY is rejected"""
         env_vars = {
             "GEMINI_API_KEY": ""
         }
@@ -91,7 +93,7 @@ class TestSettingsFieldValidation:
             )
 
     def test_gemini_api_key_invalid_prefix_validation(self):
-        """Test that GEMINI_API_KEY without 'AIzaSy' prefix is rejected"""
+        """GEMINI_API_KEY without 'AIzaSy' prefix is rejected"""
         env_vars = {
             "GEMINI_API_KEY": "invalid_prefix_key_1234567890123456789"
         }
@@ -108,7 +110,7 @@ class TestSettingsFieldValidation:
                 )
 
     def test_gemini_api_invalid_length_validation(self):
-        """Test that GEMINI_API_KEY with unusual length is reject"""
+        """GEMINI_API_KEY with unusual length is rejected"""
 
         # Test too short (< 30)
         env_vars = {
@@ -143,7 +145,7 @@ class TestSettingsFieldValidation:
                 )
 
     def test_gemini_api_key_valid_format(self):
-        """Test that valid GEMINI_API_KEY format passes validation"""
+        """Valid GEMINI_API_KEY format passes validation"""
         env_vars = {
             "GEMINI_API_KEY": VALID_GEMINI_API_KEY
         }
@@ -153,7 +155,7 @@ class TestSettingsFieldValidation:
             assert settings.GEMINI_API_KEY == VALID_GEMINI_API_KEY
 
     def test_log_level_literal_validation(self):
-        """Test that LOG_LEVEL only accepts valid values"""
+        """LOG_LEVEL only accepts DEBUG, INFO, WARNING, ERROR, CRITICAL"""
         valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
         # Test all valid levels
@@ -185,7 +187,7 @@ class TestSettingsFieldValidation:
                 )
 
     def test_log_file_retention_positive_validation(self):
-        """Test that LOG_FILE_RETENTION must be >= 1"""
+        """LOG_FILE_RETENTION must be >= 1"""
         # Test valid values
         for retention in [1, 7, 30, 356]:
             env_vars = {
@@ -197,7 +199,7 @@ class TestSettingsFieldValidation:
                 settings = Settings(_env_file=None)
                 assert settings.LOG_FILE_RETENTION == retention
 
-        # Test invalud values
+        # Test invalid values
         for invalid_retention in [0, -1, -10]:
             env_vars = {
                 "GEMINI_API_KEY": VALID_GEMINI_API_KEY,
@@ -215,9 +217,10 @@ class TestSettingsFieldValidation:
                 )
 
 class TestSettingsInstanceCreation:
-    """Test settings instance creation and access"""
+    """Tests for settings instance creation and access"""
+
     def test_settings_instance_creation(self):
-        """Test that settings instance can be created"""
+        """Settings instance can be created with valid GEMINI_API_KEY"""
         env_vars = {
             "GEMINI_API_KEY": VALID_GEMINI_API_KEY
         }
@@ -235,7 +238,7 @@ class TestSettingsInstanceCreation:
             assert hasattr(settings, "LOG_FILE_RETENTION")
 
     def test_settings_field_types(self):
-        """Test that settings fiedls have correct types"""
+        """Settings fields have correct types"""
         env_vars = {
             "GEMINI_API_KEY": VALID_GEMINI_API_KEY
         }
@@ -251,17 +254,17 @@ class TestSettingsInstanceCreation:
             assert isinstance(settings.LOG_FILE_RETENTION, int)
 
 class TestSettingsIntegration:
-    """Test settings integration with other components"""
+    """Tests for settings integration with other components"""
 
     def test_settings_can_be_imported(self):
-        """Test that settings can be import from config module"""
+        """settings can be imported from config module"""
         from config import settings
 
         assert settings is not None
         assert isinstance(settings, Settings)
 
     def test_settings_used_in_gemini_client(self):
-        """Test that settings can be used to initialize GeminiClient"""
+        """settings can be used to initialize GeminiClient"""
         env_vars = {
             "GEMINI_API_KEY": VALID_GEMINI_API_KEY
         }
@@ -273,7 +276,7 @@ class TestSettingsIntegration:
             assert hasattr(settings, "GEMINI_MODEL")
 
     def test_settings_load_from_env_file(self):
-        """Test that settings can be loaded from .env file"""
+        """Settings can be loaded from .env file"""
         env_vars = {
             "GEMINI_API_KEY": VALID_GEMINI_API_KEY,
             "GEMINI_MODEL": "gemini-2.5-pro",

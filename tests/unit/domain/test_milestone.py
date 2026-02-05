@@ -1,5 +1,7 @@
 """
-Unit test for Milestone models
+test_milestone.py
+
+Unit tests for Milestone model (week, topic, resources, validation constraints)
 """
 import pytest
 from pydantic import ValidationError
@@ -10,7 +12,7 @@ class TestMilestone:
     """Tests for Milestone model"""
 
     def test_create_milestone_minimal(self):
-        """Test creating a valid milestone with minimal fields"""
+        """Milestone with minimal required fields is valid"""
         milestone = Milestone(
             week=1,
             topic="Python Basics",
@@ -31,7 +33,7 @@ class TestMilestone:
         assert milestone.learning_objectives is None
 
     def test_create_milestone_full(self):
-        """Test creating a milestone with all fields"""
+        """Milestone with all fields (estimated_time, learning_objectives) is valid"""
         milestone = Milestone(
             week=1,
             topic="Python Basics",
@@ -51,7 +53,7 @@ class TestMilestone:
         assert len(milestone.learning_objectives) == 2
 
     def test_milestone_week_validation(self):
-        """Test week must be >= 1"""
+        """week must be >= 1; invalid raises ValidationError"""
         # Valid week
         milestone = Milestone(
             week=1,
@@ -84,7 +86,7 @@ class TestMilestone:
             )
 
     def test_milestone_resources_min_length(self):
-        """Test that resources list must be have at least 1 item"""
+        """resources list must have at least 1 item; empty raises ValidationError"""
         # Valid: 1 resource
         milestone = Milestone(
             week=1,
@@ -110,7 +112,7 @@ class TestMilestone:
             )
 
     def test_milestone_topic_max_length(self):
-        """Test that topic max_length constraint is enforced"""
+        """topic max_length (200) is enforced; excess raises ValidationError"""
         # Valid length
         milestone = Milestone(
             week=1,
@@ -142,7 +144,7 @@ class TestMilestone:
             )
 
     def test_milestone_description_max_length(self):
-        """Test that description max_length_constraint is enforced"""
+        """description max_length (1000) is enforced; excess raises ValidationError"""
         # Valid length
         milestone = Milestone(
             week=1,

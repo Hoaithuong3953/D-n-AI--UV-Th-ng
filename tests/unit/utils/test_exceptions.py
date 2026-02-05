@@ -1,5 +1,7 @@
 """
-Unit tests for LearnPath exceptions
+test_exceptions.py
+
+Unit tests for LearnPath exceptions (LearnPathException, LLMServiceError, ValidationError)
 """
 import pytest
 from http import HTTPStatus
@@ -7,12 +9,10 @@ from http import HTTPStatus
 from utils import LearnPathException, LLMServiceError, ValidationError
 
 class TestLearnPathException:
-    """
-    Test base LearnPathException class
-    """
+    """Tests for base LearnPathException class"""
 
     def test_exception_creation_with_defaults(self):
-        """Test exception creation with default values"""
+        """LearnPathException has default code, message, status_code, extra"""
         exc = LearnPathException()
 
         assert exc.code == "GENERAL_ERROR"
@@ -21,7 +21,7 @@ class TestLearnPathException:
         assert exc.extra == {}
 
     def test_exception_creation_with_custom_values(self):
-        """Test exception creation with custom values"""
+        """LearnPathException accepts custom message, code, status_code, extra"""
         exc = LearnPathException(
             message="Custom error message",
             code="CUSTOM_ERROR",
@@ -35,7 +35,7 @@ class TestLearnPathException:
         assert exc.extra == {"extra_field": "extra_value"}
 
     def test_to_dict_method(self):
-        """Test to_dict() method converts exception to dictionary"""
+        """to_dict() converts exception to dictionary with error code, message, status_code"""
         exc = LearnPathException(
             message="Test error",
             code="TEST_ERROR",
@@ -52,7 +52,7 @@ class TestLearnPathException:
         assert result["error"]["user_id"] == "user123"
 
     def test_to_dict_return_type(self):
-        """Test that to_dict() returns Dict[str, Any] type"""
+        """to_dict() returns a dict with 'error' key containing nested dict"""
         exc = LearnPathException()
         result = exc.to_dict()
 
@@ -60,7 +60,7 @@ class TestLearnPathException:
         assert isinstance(result["error"], dict)
 
     def test__str__method(self):
-        """Test __str__ method for user-friendly error messages"""
+        """__str__ returns user-friendly string with code, status_code, message"""
         exc = LearnPathException(
             message="Test error",
             code="TEST_ERROR",
@@ -74,12 +74,10 @@ class TestLearnPathException:
         assert "Test error" in str_repr
 
 class TestLLMServiceError:
-    """
-    Test LLMServiceError exception
-    """
+    """Tests for LLMServiceError exception"""
 
     def test_default_values(self):
-        """Test LLMServiceError with default values"""
+        """LLMServiceError has default code, message, status_code"""
         exc = LLMServiceError()
 
         assert exc.code == "LLM_SERVICE_ERROR"
@@ -87,7 +85,7 @@ class TestLLMServiceError:
         assert exc.status_code == HTTPStatus.BAD_REQUEST.value
 
     def test_custom_messages(self):
-        """Test LLMServiceError with custom message"""
+        """LLMServiceError accepts custom message"""
         exc = LLMServiceError(message="API timeout after 30s")
 
         assert exc.code == "LLM_SERVICE_ERROR"
@@ -95,18 +93,17 @@ class TestLLMServiceError:
         assert exc.status_code == HTTPStatus.BAD_REQUEST.value
 
     def test_inheritance(self):
-        """Test that LLMServiceError inherits from LearnPathException"""
+        """LLMServiceError inherits from LearnPathException"""
         exc = LLMServiceError()
 
         assert isinstance(exc, LearnPathException)
         assert isinstance(exc, Exception)
 
 class TestValidationError:
-    """
-    Test ValidationError exception
-    """
+    """Tests for ValidationError exception"""
+
     def test_default_values(self):
-        """Test ValidationError with default values"""
+        """ValidationError has default code, message, status_code"""
         exc = ValidationError()
         
         assert exc.code == "VALIDATION_ERROR"
@@ -114,7 +111,7 @@ class TestValidationError:
         assert exc.status_code == HTTPStatus.BAD_REQUEST.value
 
     def test_custom_message(self):
-        """Test ValidationError with custom message"""
+        """ValidationError accepts custom message"""
         exc = ValidationError(message="Invalid user input: empty string")
         
         assert exc.code == "VALIDATION_ERROR"
@@ -122,7 +119,7 @@ class TestValidationError:
         assert exc.status_code == HTTPStatus.BAD_REQUEST.value
 
     def test_inheritance(self):
-        """Test that ValidationError inherits from LearnPathException"""
+        """ValidationError inherits from LearnPathException"""
         exc = ValidationError()
         assert isinstance(exc, LearnPathException)
         assert isinstance(exc, Exception)

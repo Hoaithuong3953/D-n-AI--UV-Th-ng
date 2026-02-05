@@ -1,5 +1,7 @@
 """
-Unit test for ChatMessage model
+test_chat_message.py
+
+Unit tests for ChatMessage model (roles, content, timestamp, role literal validation)
 """
 import pytest
 from pydantic import ValidationError
@@ -9,8 +11,9 @@ from domain import ChatMessage
 
 class TestChatMessage:
     """Tests for ChatMessage model"""
+
     def test_create_chat_message_user(self):
-        """Test creating a user chat message"""
+        """ChatMessage with role='user' has correct role, content, timestamp"""
         message = ChatMessage(
             role="user",
             content="Hello"
@@ -20,7 +23,7 @@ class TestChatMessage:
         assert isinstance(message.timestamp, datetime)
 
     def test_create_chat_message_assistant(self):
-        """Test creating an assistant chat message"""
+        """ChatMessage with role='assistant' has correct role, content, timestamp"""
         message = ChatMessage(
             role="assistant",
             content="Hello"
@@ -30,7 +33,7 @@ class TestChatMessage:
         assert isinstance(message.timestamp, datetime)
 
     def test_create_chat_message_system(self):
-        """Test creating a system chat message"""
+        """ChatMessage can store system-like content with role='user' (system stored as user)"""
         message = ChatMessage(
             role="user",
             content="System error"
@@ -40,7 +43,7 @@ class TestChatMessage:
         assert isinstance(message.timestamp, datetime)
 
     def test_chat_message_role_literal(self):
-        """Test that role must be valid literal"""
+        """role must be one of system, user, assistant; invalid raises ValidationError"""
         # Valid roles
         valid_roles = ["system", "user", "assistant"]
         for role in valid_roles:

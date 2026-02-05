@@ -28,9 +28,10 @@ from config import (
     MessageProvider,
 )
 from utils import LLMServiceError, logger
+from services.chat_service import StreamError
 
 if TYPE_CHECKING:
-    from services.chat_service import ChatService, StreamError
+    from services.chat_service import ChatService
     from services.session_manager import SessionManager
     from memory import ChatHistory
 
@@ -81,7 +82,7 @@ class AppService:
         if len(user_input) > MAX_INPUT_LENGTH:
             yield ErrorOccurred(
                 "validation",
-                self.messages.get(MessageKey.INPUT_TOO_LONG, max_length=str(MAX_INPUT_LENGTH))
+                self.messages.format(MessageKey.INPUT_TOO_LONG, max=str(MAX_INPUT_LENGTH))
             )
             return
         

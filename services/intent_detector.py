@@ -1,17 +1,23 @@
 """
 intent_detector.py
 
-Intent detection for chat routing; uses LLM to classify user message intent
+Two tier intent detection: rule (keywords) first, LLM fallback
 
 Key features:
-- IntentDetector: classify roadmap vs chat intent via LLM
-- is_roadmap_intent: returns True when user asks for a learning roadmap
+- IntentDetector: classify roadmap vs chat intent
+- ROADMAP_KEYWORDS for rule-based, INTENT PROMPT for LLM fallback
 """
-from typing import Optional
-
 from ai import LLMClient
 from domain import Intent
 from utils import logger
+
+ROADMAP_KEYWORDS = [
+    "lộ trình",
+    "roadmap",
+    "kế hoạch học",
+    "learning path",
+    "tạo lộ trình",
+]
 
 INTENT_PROMPT = """
 Phân loại intent của người dùng. Chỉ trả về MỘT trong các giá trị:
@@ -38,42 +44,34 @@ class IntentDetector:
 
     def is_roadmap_intent(self, text: str) -> bool:
         """
-        Classify whether the user message expresses intent to create or get a learning roadmap
+        Classify intent: keyword match -> ROADMAP; else LLM fallback -> CHAT or ROADMAP
 
         Args:
-            text: Raw user message (empty/whitespace is treated as non-roadmap)
+            text: Raw user message
 
         Returns:
-            True if intent is ROADMAP; False otherwise (including on LLM failure)
+            Intent.CHAT or Intent.ROADMAP; empty text returns Intent.CHAT
         """
         text = (text or "").strip()
         if not text:
-            return False
+            return Intent.CHAT
+        lower = text.lower()
+        if any(k in lower for k in ROADMAP_KEYWORDS):
+            logger.info("intent detect: keyword match -> ROADMAP")
+            return Intent.ROADMAP
         
+        out = self._detect_by_llm(text)
+        logger.info(f"intent detect: llm fallback -> {out.value}")
+        return out
+    
+    def _detect_by_llm(self, text: str) -> Intent:
+        """Fallback: call LLM with short timeout; parse response for ROADMAP, default CHAT"""
         try:
             prompt = INTENT_PROMPT.format(text=text)
             response = self.llm.generate_text(prompt)
-            return self._parse_roadmap_intent(response)
+            if response and "ROADMAP" in response.strip().upper():
+                return Intent.ROADMAP
+            
         except Exception as e:
-            logger.warning(f"Intent detection failed, treating as non-roadmap: {e}")
-            return False
-    
-    def detect(self, text: str) -> Intent:
-        """
-        Classify user message intent (CHAT or ROADMAP).
-
-        Args:
-            text: Raw user message.
-
-        Returns:
-            Intent.ROADMAP if user asks for a learning roadmap; Intent.CHAT otherwise
-        """
-        return Intent.ROADMAP if self.is_roadmap_intent(text) else Intent.CHAT
-
-    @staticmethod
-    def _parse_roadmap_intent(response: Optional[str]) -> bool:
-        """Return True if LLM response indicates ROADMAP intent"""
-        if not response:
-            return False
-        normalized = response.strip().upper()
-        return "ROADMAP" in normalized
+            logger.warning(f"Intent detection LLM fallback failed: {e}")
+        return Intent.CHAT

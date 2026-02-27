@@ -1,14 +1,15 @@
 """
 intent_detector.py
 
-Two tier intent detection: rule (keywords) first, LLM fallback
+Two tier intent detection: rule-based keywords first, LLM fallback
 
 Key features:
-- IntentDetector: classify roadmap vs chat intent
-- ROADMAP_KEYWORDS for rule-based, INTENT PROMPT for LLM fallback
+- detect(text) -> IntentResult with intent, decision score and detection method
+- Rule-based: Fast keyword matching for ROADMAP intent
+- LLM fallback: When no keyword match
 """
 from ai import LLMClient
-from domain import Intent
+from domain import Intent, IntentResult, IntentDetectionMethod
 from utils import logger
 
 ROADMAP_KEYWORDS = [
@@ -17,6 +18,9 @@ ROADMAP_KEYWORDS = [
     "kế hoạch học",
     "learning path",
     "tạo lộ trình",
+    "muốn học",
+    "học trong",
+    "bắt đầu học",
 ]
 
 INTENT_PROMPT = """
@@ -32,43 +36,103 @@ Trả về duy nhất 1 từ:
 
 class IntentDetector:
     """
-    Detect user intent (roadmap vs chat) using LLM classification
+    Detect user intent (CHAT, ROADMAP) with decision score
 
-    Responsibilities:
-    - Classify user message as ROADMAP or CHAT via LLM
-    - Return False on empty input or LLM failure (fail-safe to chat)
+    Two-tiew detection strategy:
+    1. Keyword matching: Fast, high confidence
+    2. LLM fallback: Slower, lower confidence
+
+    Decision score are heuristic utilities for monitoring
+    Scores indicate detection method quality, not true probability
+
+    Attributes:
+        SCORE_KEYWORD: 0.95 - Keyword match (strong signal)
+        SCORE_LLM_SHORT: 0.45 - LLM on short text 1-4 words (weak signal)
+        SCORE_LLM_MEDIUM: 0.55 - LLM on medium text 5+ word (medium signal)
+        SCORE_EMPTY: 0.0 - Empty input (default to CHAT)
     """
+
+    SCORE_KEYWORD = 0.95
+    SCORE_LLM_SHORT = 0.45
+    SCORE_LLM_MEDIUM = 0.55
+    SCORE_EMPTY = 0.0
+
     def __init__(self, llm_client: LLMClient):
-        """Initialize with LLM client used for classification"""
+        """
+        Initialize IntentDetector with LLM client
+
+        Args:
+            llm_client: LLM client for fallback intent detection
+        """
         self.llm = llm_client
 
-    def is_roadmap_intent(self, text: str) -> bool:
+    def detect(self, text: str) -> IntentResult:
         """
-        Classify intent: keyword match -> ROADMAP; else LLM fallback -> CHAT or ROADMAP
+        Detect user intent with two-tier strategy (keyword -> LLM)
 
         Args:
             text: Raw user message
 
         Returns:
-            Intent.CHAT or Intent.ROADMAP; empty text returns Intent.CHAT
+            intent, score and method for IntentResult
         """
-        text = (text or "").strip()
-        if not text:
-            return Intent.CHAT
-        lower = text.lower()
-        if any(k in lower for k in ROADMAP_KEYWORDS):
-            logger.info("intent detect: keyword match -> ROADMAP")
-            return Intent.ROADMAP
+        text = text.strip()
+        if not text or "".strip():
+            logger.debug("intent detect: empty -> CHAT (score=0.0)")
+            return IntentResult(
+                intent=Intent.CHAT,
+                score=self.SCORE_EMPTY,
+                method=IntentDetectionMethod.LLM
+            )
         
-        out = self._detect_by_llm(text)
-        logger.info(f"intent detect: llm fallback -> {out.value}")
-        return out
+        text_lower = text.lower()
+
+        # Rule 1: Keyword match
+        for keyword in ROADMAP_KEYWORDS:
+            if keyword in text_lower:
+                logger.info(f"intent detect: keyword '{keyword}' -> ROADMAP (score=0.95)")
+                return IntentResult(
+                    intent=Intent.ROADMAP,
+                    score=self.SCORE_KEYWORD,
+                    method=IntentDetectionMethod.KEYWORD
+                )
+        
+        # Rule 2: LLM fallback
+        llm_intent = self._detect_by_llm(text)
+
+        # Estimate score based on text length (heuristic)
+        word_count = len(text.split())
+        if word_count < 5:
+            score = self.SCORE_LLM_SHORT
+        else:
+            score = self.SCORE_LLM_MEDIUM
+
+        logger.info(
+            f"intent detect: llm -> {llm_intent.value} "
+            f"score={score:.2f}, words={word_count}"
+        )
+
+        return IntentResult(
+            intent=llm_intent,
+            score=score,
+            method=IntentDetectionMethod.LLM
+        )
     
     def _detect_by_llm(self, text: str) -> Intent:
-        """Fallback: call LLM with short timeout; parse response for ROADMAP, default CHAT"""
+        """
+        LLM fallback for intent detection
+
+        Args:
+            text: User message text
+
+        Returns:
+            Intent.ROADMAP if response contains "ROADMAP"
+            Intent.CHAT otherwise (default, safe fallback)
+        """
         try:
             prompt = INTENT_PROMPT.format(text=text)
             response = self.llm.generate_text(prompt)
+            
             if response and "ROADMAP" in response.strip().upper():
                 return Intent.ROADMAP
             

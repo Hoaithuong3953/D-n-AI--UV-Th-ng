@@ -12,10 +12,12 @@ from .chat_service import ChatService
 from .session_manager import SessionManager
 from .roadmap_service import RoadmapService
 from .app_service import AppService
+from .intent_detector import IntentDetector
 
 __all__ = [
     "ChatService", 
     "SessionManager",
     "RoadmapService",
     "AppService",
+    "IntentDetector",
 ]

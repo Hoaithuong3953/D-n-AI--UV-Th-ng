@@ -11,7 +11,7 @@ Key features:
 """
 
 from .chat import ChatMessage
-from .intent import Intent, IntentDetectionMethod, IntentResult
+from .intent import Intent, IntentDetectionMethod, IntentResult, ConfidenceLevel
 from .roadmap import Resource, Milestone, Roadmap
 from .user import UserProfile
 from .events import (
@@ -31,6 +31,7 @@ __all__ = [
     "Intent",
     "IntentDetectionMethod",
     "IntentResult",
+    "ConfidenceLevel",
     "Event",
     "TextChunk",
     "StatusUpdate",

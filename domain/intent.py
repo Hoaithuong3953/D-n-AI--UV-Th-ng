@@ -33,26 +33,32 @@ class IntentDetectionMethod(Enum):
     KEYWORD = "keyword"
     LLM = "llm"
 
+class ConfidenceLevel(Enum):
+    """
+    Relative confidence level of detection strategy
+    """
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+
 class IntentResult(BaseModel):
     """
     Result from intent detection with decision score
 
     Attributes:
         intent: Detected user intent (CHAT, ROADMAP)
-        score: Decision score 0.0-1.0 for monitoring/debugging
         method: Detection method used (KEYWORD or LLM)
+        confidence: Relative confidence level (LOW/MEDIUM/HIGH)
     """
     intent: Intent = Field(
         ...,
         description="Detected intent (CHAT, ROADMAP)"
     )
-    score: float = Field(
-        ...,
-        ge=0.0,
-        le=1.0,
-        description="Decision score (0.0-1.0)"
-    )
     method: IntentDetectionMethod = Field(
         ...,
         description="Detection method (keyword or llm)"
+    )
+    confidence: ConfidenceLevel = Field(
+        ...,
+        description="Relative confidence level of detection strategy"
     )

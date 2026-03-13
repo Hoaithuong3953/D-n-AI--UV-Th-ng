@@ -9,7 +9,7 @@ Key features:
 - LLM fallback: When no keyword match
 """
 from ai import LLMClient
-from domain import Intent, IntentResult, IntentDetectionMethod
+from domain import Intent, IntentResult, IntentDetectionMethod, ConfidenceLevel
 from utils import logger
 
 ROADMAP_KEYWORDS = [
@@ -42,20 +42,15 @@ class IntentDetector:
     1. Keyword matching: Fast, high confidence
     2. LLM fallback: Slower, lower confidence
 
-    Decision score are heuristic utilities for monitoring
-    Scores indicate detection method quality, not true probability
+    Confidence levels are heuristic utilities for monitoring
+    Levels indicate detection method quality, not true probability
 
     Attributes:
-        SCORE_KEYWORD: 0.95 - Keyword match (strong signal)
-        SCORE_LLM_SHORT: 0.45 - LLM on short text 1-4 words (weak signal)
-        SCORE_LLM_MEDIUM: 0.55 - LLM on medium text 5+ word (medium signal)
-        SCORE_EMPTY: 0.0 - Empty input (default to CHAT)
+        Keyword match: HIGH confidence (strong signal)
+        LLM on short text: LOW confidence (weak signal)
+        LLM on medium text: MEDIUM confidence (medium signal)
+        Empty input: LOW confidence (default to CHAT)
     """
-
-    SCORE_KEYWORD = 0.95
-    SCORE_LLM_SHORT = 0.45
-    SCORE_LLM_MEDIUM = 0.55
-    SCORE_EMPTY = 0.0
 
     def __init__(self, llm_client: LLMClient):
         """
@@ -74,15 +69,15 @@ class IntentDetector:
             text: Raw user message
 
         Returns:
-            intent, score and method for IntentResult
+            intent, method and confidence level for IntentResult
         """
         text = text.strip()
         if not text or "".strip():
-            logger.debug("intent detect: empty -> CHAT (score=0.0)")
+            logger.debug("intent detect: empty -> CHAT (confidence=LOW)")
             return IntentResult(
                 intent=Intent.CHAT,
-                score=self.SCORE_EMPTY,
-                method=IntentDetectionMethod.LLM
+                method=IntentDetectionMethod.LLM,
+                confidence=ConfidenceLevel.LOW,
             )
         
         text_lower = text.lower()
@@ -90,11 +85,11 @@ class IntentDetector:
         # Rule 1: Keyword match
         for keyword in ROADMAP_KEYWORDS:
             if keyword in text_lower:
-                logger.info(f"intent detect: keyword '{keyword}' -> ROADMAP (score=0.95)")
+                logger.info(f"intent detect: keyword '{keyword}' -> ROADMAP (confidence=HIGH)")
                 return IntentResult(
                     intent=Intent.ROADMAP,
-                    score=self.SCORE_KEYWORD,
-                    method=IntentDetectionMethod.KEYWORD
+                    method=IntentDetectionMethod.KEYWORD,
+                    confidence=ConfidenceLevel.HIGH,
                 )
         
         # Rule 2: LLM fallback
@@ -103,19 +98,19 @@ class IntentDetector:
         # Estimate score based on text length (heuristic)
         word_count = len(text.split())
         if word_count < 5:
-            score = self.SCORE_LLM_SHORT
+            confidence = ConfidenceLevel.LOW
         else:
-            score = self.SCORE_LLM_MEDIUM
+            confidence = ConfidenceLevel.MEDIUM
 
         logger.info(
             f"intent detect: llm -> {llm_intent.value} "
-            f"score={score:.2f}, words={word_count}"
+            f"confidence={confidence.name}, words={word_count}"
         )
 
         return IntentResult(
             intent=llm_intent,
-            score=score,
-            method=IntentDetectionMethod.LLM
+            method=IntentDetectionMethod.LLM,
+            confidence=confidence
         )
     
     def _detect_by_llm(self, text: str) -> Intent:

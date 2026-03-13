@@ -5,10 +5,12 @@ Chat domain models: ChatMessage
 
 Key features:
 - ChatMessage: role (user/assistant), content, timestamp
+- ConversationState: track multi-turn flows (NORMAL, AWAITING_PROFILE_INFO)
 - Auto-generated timestamp on message creation
 """
 
 from datetime import datetime
+from enum import Enum
 from typing import Literal
 from pydantic import BaseModel, Field
 
@@ -30,3 +32,10 @@ class ChatMessage(BaseModel):
         default_factory=datetime.now,
         description="Timestamp when the message was created"
     )
+
+class ConversationState(Enum):
+    """
+    Conversation state for multi-turn interaction flows
+    """
+    NORMAL = "normal"
+    AWAITING_PROFILE_INFO = "awaiting_profile_info"

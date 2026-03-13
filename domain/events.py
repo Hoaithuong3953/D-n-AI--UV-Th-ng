@@ -12,6 +12,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
+from domain.snapshots import ProfileSnapshot, RoadmapSnapshot
+
 @dataclass(frozen=True)
 class Event:
     """Base event; all stream events subclass this and are immutable"""
@@ -38,3 +40,13 @@ class ErrorOccurred(Event):
 class SessionExpired(Event):
     """Session expired due to inactivity"""
     message: str
+
+@dataclass(frozen=True)
+class ProfileExtracted(Event):
+    """User profile successfully extracted from conversation"""
+    profile: ProfileSnapshot
+
+@dataclass(frozen=True)
+class RoadmapCreated(Event):
+    """Learning roadmap successfully created"""
+    roadmap: RoadmapSnapshot

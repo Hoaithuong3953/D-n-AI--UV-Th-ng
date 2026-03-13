@@ -6,7 +6,7 @@ Key features:
 - Re-export ChatMessage, ConversationState from chat
 - Re-export UserProfile from user
 - Re-export Intent from intent
-- Re-export Event, TextChunk, StatusUpdate, ErrorOccurred, SessionExpired from events
+- Re-export Event, TextChunk, StatusUpdate, ErrorOccurred, SessionExpired, ProfileExtractor, RoadmapCreated from events
 - Independent of application and infrastructure layers
 """
 
@@ -19,7 +19,9 @@ from .events import (
     TextChunk,
     StatusUpdate,
     ErrorOccurred,
-    SessionExpired
+    SessionExpired,
+    ProfileExtracted,
+    RoadmapCreated,
 )
 
 __all__ = [
@@ -38,4 +40,6 @@ __all__ = [
     "StatusUpdate",
     "ErrorOccurred",
     "SessionExpired",
+    "ProfileExtracted",
+    "RoadmapCreated",
 ]

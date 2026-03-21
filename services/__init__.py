@@ -13,6 +13,7 @@ from .session_manager import SessionManager
 from .roadmap_service import RoadmapService
 from .app_service import AppService
 from .intent_detector import IntentDetector
+from .profile_extractor import ProfileExtractor
 
 __all__ = [
     "ChatService", 
@@ -20,4 +21,5 @@ __all__ = [
     "RoadmapService",
     "AppService",
     "IntentDetector",
+    "ProfileExtractor",
 ]

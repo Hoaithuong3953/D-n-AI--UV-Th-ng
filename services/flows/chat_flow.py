@@ -9,7 +9,7 @@ from domain import ChatMessage
 from domain.events import Event, TextChunk, ErrorOccurred
 from config import MessageKey
 from utils import logger
-from services.chat_service import StreamError
+from services.core.chat_service import StreamError
 
 if TYPE_CHECKING:
     from services.app_service import AppService

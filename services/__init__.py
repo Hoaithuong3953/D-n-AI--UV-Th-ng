@@ -8,12 +8,12 @@ Key features:
 - AppService: orchestrate services, handle events, manage session state
 """
 
-from .chat_service import ChatService
-from .session_manager import SessionManager
-from .roadmap_service import RoadmapService
+from .core.chat_service import ChatService
+from .support.session_manager import SessionManager
+from .core.roadmap_service import RoadmapService
 from .app_service import AppService
-from .intent_detector import IntentDetector
-from .profile_extractor import ProfileExtractor
+from .support.intent_detector import IntentDetector
+from .support.profile_extractor import ProfileExtractor
 
 __all__ = [
     "ChatService", 

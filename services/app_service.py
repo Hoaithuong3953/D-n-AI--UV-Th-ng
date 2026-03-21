@@ -35,11 +35,11 @@ from utils import LLMServiceError, logger
 from services.flows import chat_flow, roadmap_flow
 
 if TYPE_CHECKING:
-    from services.chat_service import ChatService
-    from services.session_manager import SessionManager
-    from services.intent_detector import IntentDetector
-    from services.profile_extractor import ProfileExtractor
-    from services.roadmap_service import RoadmapService
+    from services.core.chat_service import ChatService
+    from services.support.session_manager import SessionManager
+    from services.support.intent_detector import IntentDetector
+    from services.support.profile_extractor import ProfileExtractor
+    from services.core.roadmap_service import RoadmapService
     from memory import ChatHistory
 
 class AppService:

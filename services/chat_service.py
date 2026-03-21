@@ -7,7 +7,7 @@ Key features:
 - stream_response(user_input) yields str chunks or StreamError(key); Application resolves key to message
 - No MessageProvider; facade owns message resolution
 """
-from typing import Generator, List, Union, Union
+from typing import Generator, List, Union
 from dataclasses import dataclass
 
 from utils import logger, LLMServiceError

@@ -145,12 +145,13 @@ class GeminiClient:
         Generate text from prompt
 
         Args:
-            prompt: Input text. If empty, returns empty string
+            prompt: Input text for generation; must be non-empty after stripping
 
         Returns:
             Generated content; empty string if blocked/filtered
 
         Raises:
+            ValidationError: If prompt is empty
             LLMServiceError: On transient errors (timeout, 5xx) after retries
         """
         if not prompt or not prompt.strip():

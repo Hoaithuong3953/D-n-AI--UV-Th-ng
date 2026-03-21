@@ -6,7 +6,6 @@ for raw JSON roadmaps, parses into Roadmap domain model and applies retry/valida
 
 Key features:
 - generate_roadmap with retry logic (max 2 attempts on validation failure)
-- Supports roadmap adjustment (provide previous_roadmap + chat_context)
 - Validates output against Roadmap schema (duration, milestones, resources)
 """
 import json
@@ -46,17 +45,13 @@ class RoadmapService:
         self,
         profile: UserProfile,
         duration_week: Optional[int] = None,
-        chat_context: Optional[str] = None,
-        previous_roadmap: Optional[Roadmap] = None,
     ) -> Roadmap:
         """
-        Generate  or adjust a Roadmap from a UserProfile
+        Generate a Roadmap from a UserProfile
 
         Args:
             profile: Collected user profile information
             duration_week: Optional override for total duration in weeks
-            chat_context: Optional recent chat for personalization
-            previous_roadmap: Optional existing roadmap for adjust
         
         Returns:
             Roadmap domain object
@@ -65,9 +60,12 @@ class RoadmapService:
             ValidationError: If after max_retries the LLM output is still invalid
             LLMServiceError: Propagated if underlying LLM call fails permanently
         """
-        duration = duration_week or self._guess_duration(profile)
+        duration = duration_week or self._guess_duration()
         last_error: Optional[Exception] = None
-        logger.info(f"generate_roadmap start for profile: {profile.model_dump()} with duration_week: {duration_week}")
+        logger.info(
+            f"generate_roadmap start for profile: {profile.model_dump()} "
+            f"with duration_week: {duration_week}"
+        )
 
         for attempt in range(1, self.max_retries + 1):
             if attempt > 1:
@@ -75,8 +73,6 @@ class RoadmapService:
             prompt = self._build_prompt(
                 profile = profile,
                 duration_week = duration,
-                chat_context = chat_context,
-                previous_roadmap = previous_roadmap,
             )
 
             try:
@@ -94,8 +90,6 @@ class RoadmapService:
         self,
         profile: UserProfile,
         duration_week: int,
-        chat_context: str = "",
-        previous_roadmap: Optional[Roadmap] = None,
     ) -> str:
         """
         Build roadmap generation prompt from profile and context
@@ -103,8 +97,6 @@ class RoadmapService:
         Args:
             profile: User profile
             duration_week: Total weeks for roadmap
-            chat_context: Recent chat context for personalization (optional)
-            previous_roadmap: Existing roadmap to adjust (optional)
 
         Returns:
             Formatted prompt string ready for LLM
@@ -112,30 +104,6 @@ class RoadmapService:
         learning_style = profile.learning_style or "Không cung cấp"
         background = profile.background or "Không cung cấp"
         constraints = ", ".join(profile.constraints or ["Không có"])
-
-        if chat_context and chat_context.strip():
-            chat_context_section = (
-                "Ngữ cảnh hội thoại gần đây (ưu tiên theo yêu cầu trong đó): \n"
-                + chat_context.strip() + "\n\n"
-            )
-        else:
-            chat_context_section = ""
-
-        if previous_roadmap:
-            roadmap_json = json.dumps(
-                previous_roadmap.model_dump(mode="json"),
-                ensure_ascii=False,
-                indent=2,
-            )
-            previous_roadmap_section = (
-                "LỘ TRÌNH HIỆN TẠI (điều chỉnh theo yêu cầu mới trong hội thoại trên):\n"
-                + roadmap_json 
-                + "\n\n"
-                "Hãy ĐIỀU CHỈNH lộ trình trên theo yêu cầu mới (vd: làm ngắn hơn, thêm tuần, đổi tài liệu)."
-                "Output vẫn là JSON đúng cấu trúc, duration_week và số milestone phải khớp.\n\n"
-            )
-        else:
-            previous_roadmap_section = ""
 
         prompt = ROADMAP_PROMPT_TEMPLATE.substitute(
             goal=profile.goal,
@@ -145,8 +113,6 @@ class RoadmapService:
             background=background,
             constraints=constraints,
             duration_week=str(duration_week),
-            chat_context_section=chat_context_section,
-            previous_roadmap_section=previous_roadmap_section,
         )
 
         return prompt
@@ -179,5 +145,5 @@ class RoadmapService:
         return roadmap
     
     def _guess_duration(self) -> int:
-        """Guess duration_week from profile (simple heuristic)"""
+        """Return default roadmap duration in weeks"""
         return 8

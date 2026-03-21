@@ -14,6 +14,14 @@ from typing import List
 from ai import LLMClient, PROFILE_EXTRACT_PROMPT
 from domain import ChatMessage, UserProfile
 from utils import logger, LLMServiceError
+from services.support.profile_inference import (
+    infer_goal_from_user_text,
+    infer_level_from_user_text,
+    infer_time_commitment_from_user_text,
+    resolve_goal,
+    resolve_level,
+    resolve_time_commitment,
+)
 
 def _history_to_text(messages: List[ChatMessage]) -> str:
     """
@@ -79,7 +87,16 @@ class ProfileExtractor:
 
     def extract(self, history: List[ChatMessage]) -> UserProfile | None:
         """
-        
+        Extract UserProfile from chat history using rule-based inference then LLM fallback
+
+        Args:
+            history: Full chat history including user and assistant messages
+
+        Returns:
+            UserProfile when required fields (goal, current_level, time_commitment) are complete; otherwise None
+
+        Raises:
+            LLMServiceError: If the underlying LLM call fails at service level
         """
         if not history:
             return None
@@ -87,6 +104,23 @@ class ProfileExtractor:
         user_message = [m for m in history if m.role == "user"]
         if not user_message:
             return None
+        
+        user_text = "\n".join(m.content for m in user_message)
+
+        fast_goal = infer_goal_from_user_text(user_text)
+        fast_level = infer_level_from_user_text(user_text)
+        fast_time = infer_time_commitment_from_user_text(user_text)
+
+        if fast_goal and fast_level and fast_time:
+            self.last_missing_fields = []
+            logger.info(
+                f"Profile extracted by rule: goal={fast_goal}, level={fast_level}, time={fast_time}"
+            )
+            return UserProfile(
+                goal=fast_goal,
+                current_level=fast_level,
+                time_commitment=fast_time,
+            )
         
         conversation = _history_to_text(history)
         prompt = PROFILE_EXTRACT_PROMPT.replace("{history}", conversation)
@@ -104,9 +138,10 @@ class ProfileExtractor:
             logger.warning("LLM returned empty or invalid JSON")
             data = {}
         
-        goal = (data.get("goal") or "").strip()
-        level = (data.get("level") or "").strip()
-        time_commitment = (data.get("time_commitment") or "").strip()
+        goal = resolve_goal(data.get("goal"), user_text)
+        level_raw = (data.get("current_level") or data.get("level") or "").strip()
+        level = resolve_level(level_raw, user_text)
+        time_commitment = resolve_time_commitment(data.get("time_commitment"), user_text)
 
         missing_fields = []
         if not goal:

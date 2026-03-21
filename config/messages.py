@@ -7,6 +7,7 @@ Key features:
 - MessageKey: enum of message keys
 - MessageProvider: protocol for message provider
 - DefaultMessageProvider: default implementation with templates
+- Includes intent clarification and profile re-extraction messages
 """
 from enum import Enum
 from typing import Protocol
@@ -26,6 +27,7 @@ class MessageKey(str, Enum):
     FILL_PROFILE_MISSING_GOAL = "fill_profile_missing_goal"
     FILL_PROFILE_MISSING_LEVEL = "fill_profile_missing_level"
     FILL_PROFILE_MISSING_TIME = "fill_profile_missing_time"
+    FILL_PROFILE_MISSING_FIELDS = "fill_profile_missing_fields"
 
     # UI state
     THINKING = "thinking"
@@ -44,6 +46,9 @@ class MessageKey(str, Enum):
 
     # Intent clarification
     CLARIFY_INTENT = "clarify_intent"
+
+    # Re-extraction
+    PROFILE_STILL_INCOMPLETE = "profile_still_incomplete"
 
 class MessageProvider(Protocol):
     """Protocol for message provider"""
@@ -98,6 +103,10 @@ class DefaultMessageProvider:
             "Chưa biết bạn có bao nhiêu thời gian mỗi ngày.\n\n"
             "Bạn có thể học bao lâu mỗi ngày? (vd: 30 phút, 1 giờ, 2 giờ)"
         ),
+        MessageKey.FILL_PROFILE_MISSING_FIELDS: (
+            "Chưa đủ thông tin để tạo lộ trình.\n\n"
+            "{missing_msg}"
+        ),
 
         MessageKey.THINKING: "Đang suy nghĩ...",
 
@@ -119,7 +128,9 @@ class DefaultMessageProvider:
             "Tạo lộ trình học tập (vd: \"Tôi muốn học Python\")\n"
             "Hỏi về 1 chủ đề (vd: \"Giải thích về OOP\")\n\n"
             "Hãy mô tả rõ hơn để tôi có thể hỗ trợ bạn tốt hơn."
-        )
+        ),
+
+        MessageKey.PROFILE_STILL_INCOMPLETE: "Vẫn chưa đủ thông tin để tạo lộ trình. {missing_msg}"
     }
 
     def get(self, key: MessageKey) -> str:

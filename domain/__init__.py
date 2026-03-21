@@ -6,7 +6,7 @@ Key features:
 - Re-export ChatMessage, ConversationState from chat
 - Re-export UserProfile from user
 - Re-export Intent from intent
-- Re-export Event, TextChunk, StatusUpdate, ErrorOccurred, SessionExpired, ProfileExtractor, RoadmapCreated from events
+- Re-export Event, TextChunk, StatusUpdate, ErrorOccurred, SessionExpired, ProfileExtracted, RoadmapCreated from events
 - Independent of application and infrastructure layers
 """
 

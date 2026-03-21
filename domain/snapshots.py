@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 class ProfileSnapshot:
     """Immutable snapshot of user profile at extraction time"""
     goal: str
-    current_level: str
+    current_level: Literal["beginner", "intermediate", "advanced"]
     time_commitment: str
     learning_style: Optional[str] = None
     background: Optional[str] = None
@@ -57,12 +57,12 @@ class MilestoneSnapshot:
 class RoadmapSnapshot:
     """Immutable snapshot of roadmap at creation time"""
     topic: str
+    created_at: datetime
     title: Optional[str] = None
     description: Optional[str] = None
     duration_week: int = 1
     milestones: Tuple[MilestoneSnapshot, ...] = ()
     prerequisites: Optional[Tuple[str, ...]] = None
-    created_at: datetime
 
 def from_user_profile(profile: UserProfile) -> ProfileSnapshot:
     """Build ProfileSnapshot from UserProfile aggregate (at event time)"""
@@ -95,7 +95,7 @@ def from_roadmap(roadmap: Roadmap) -> RoadmapSnapshot:
             estimated_time=m.estimated_time,
             learning_objectives=(
                 tuple(m.learning_objectives)
-                if m.learning_object 
+                if m.learning_objectives
                 else None
             ),
         )

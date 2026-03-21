@@ -9,7 +9,7 @@ Key features:
 - Pydantic validation with field constraints
 """
 
-from typing import List, Optional
+from typing import List, Optional, Literal
 from pydantic import BaseModel, Field
 
 class UserProfile(BaseModel):
@@ -21,9 +21,9 @@ class UserProfile(BaseModel):
         max_length=500,
         description="User's learning goal"
     )
-    current_level: str = Field(
+    current_level: Literal["beginner", "intermediate", "advanced"] = Field(
         ...,
-        description="User's current skill level (e.g., 'beginner', 'intermediate', 'advanced')"
+        description="User's current skill level (beginner/intermediate/advanced)"
     )
     time_commitment: str = Field(
         ...,

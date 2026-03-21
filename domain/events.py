@@ -5,7 +5,7 @@ Unified event types for application stream
 
 Key features:
 - UI consumes handle_message() as Generator[Event]; single source of event semantics
-- Event, TextChunk, StatusUpdate, ErrorOccurred, SessionExpired
+- Event, TextChunk, StatusUpdate, ErrorOccurred, SessionExpired, ProfileExtracted, RoadmapCreated
 """
 from __future__ import annotations
 

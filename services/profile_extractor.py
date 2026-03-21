@@ -58,7 +58,7 @@ def _parse_profile_json(raw: str) -> dict | None:
     if match:
         raw = match.group(0)
     try:
-        return json.load(raw)
+        return json.loads(raw)
     except json.JSONDecodeError:
         return None
 

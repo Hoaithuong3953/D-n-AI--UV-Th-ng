@@ -17,7 +17,6 @@ from domain import (
 )
 from domain.events import (
     Event,
-    TextChunk,
     StatusUpdate,
     ErrorOccurred,
     SessionExpired,
@@ -28,7 +27,7 @@ from config import (
     MessageProvider,
 )
 from utils import LLMServiceError, logger
-from services.chat_service import StreamError
+from services.flows import chat_flow
 
 if TYPE_CHECKING:
     from services.chat_service import ChatService
@@ -102,7 +101,7 @@ class AppService:
         )
 
         try:
-            yield from self._handle_chat_request(user_input)
+            yield from chat_flow.handle_chat_request(self, user_input)
         except LLMServiceError as e:
             msg = self.messages.get(MessageKey.LLM_ERROR)
             yield ErrorOccurred("llm", msg)
@@ -113,26 +112,6 @@ class AppService:
             yield ErrorOccurred("unexpected", msg)
             self._memory.add_message(ChatMessage(role="assistant", content=msg))
         logger.info("handle_message end")
-
-    def _handle_chat_request(self, user_input: str) -> Generator[Event, None, None]:
-        """Chat request handler: stream chat response, yield TextChunk and ErrorOccurred events"""
-        logger.info("_handle_chat_request start")
-        full_response = ""
-        history = self._get_recent_history()
-        for item in self._chat.stream_response(user_input, history):
-            if isinstance(item, str):
-                full_response += item
-                yield TextChunk(item)
-            else:
-                assert isinstance(item, StreamError)
-                msg = self.messages.get(item.key)
-                error_type = "llm" if item.key == MessageKey.LLM_ERROR else "unexpected"
-                yield ErrorOccurred(error_type, msg)
-                self._memory.add_message(ChatMessage(role="assistant", content=msg))
-                return
-        if full_response:
-            self._memory.add_message(ChatMessage(role="assistant", content=full_response))
-        logger.info(f"handle_chat_request end (response len={len(full_response)})")
 
     def _get_recent_history(self) -> List[ChatMessage]:
         """Return recent chat history for ChatService and RoadmapService"""

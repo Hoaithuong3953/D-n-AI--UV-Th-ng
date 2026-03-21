@@ -38,7 +38,7 @@ class IntentDetector:
     """
     Detect user intent (CHAT, ROADMAP) with decision score
 
-    Two-tiew detection strategy:
+    Two-tier detection strategy:
     1. Keyword matching: Fast, high confidence
     2. LLM fallback: Slower, lower confidence
 

@@ -17,8 +17,11 @@ from domain.events import (
     StatusUpdate,
     ErrorOccurred,
     SessionExpired,
+    ProfileExtracted,
+    RoadmapCreated
 )
 from config import MessageKey
+from ui.roadmap_presenter import format_roadmap_markdown
 
 if TYPE_CHECKING:
     from services import AppService
@@ -29,12 +32,19 @@ def render_chat_interface(app: AppService) -> None:
 
     Args:
         app: AppService instance providing history, messages and handle_message()
+
+    Side Effects:
+        Calls st.rerun() after processing user input to refresh Streamlit UI state
     """
     history = app._memory.load_history()
     for msg in history:
         role = "assistant" if msg.role == "assistant" else "user"
         with st.chat_message(role):
             st.markdown(msg.content)
+
+    if app.current_roadmap is not None:
+        with st.chat_message("assistant"):
+            st.markdown(format_roadmap_markdown(app.current_roadmap))
 
     user_input = st.chat_input("Nhập tin nhắn...")
     if user_input:
@@ -59,6 +69,15 @@ def render_chat_interface(app: AppService) -> None:
                     case StatusUpdate(message=message):
                         full = message
                         showing_status = True
+                        placeholder.markdown(full)
+                    case ProfileExtracted():
+                        pass
+                    case RoadmapCreated(roadmap=roadmap):
+                        if showing_status:
+                            full = format_roadmap_markdown(roadmap)
+                        else:
+                            full += "\n\n" + format_roadmap_markdown(roadmap)
+                        showing_status = False
                         placeholder.markdown(full)
                     case ErrorOccurred(user_message=user_message):
                         if showing_status:

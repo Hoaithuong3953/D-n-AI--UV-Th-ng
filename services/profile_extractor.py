@@ -102,8 +102,7 @@ class ProfileExtractor:
         data = _parse_profile_json(response)
         if not data or not isinstance(data, dict):
             logger.warning("LLM returned empty or invalid JSON")
-            self.last_missing_fields = ["goal", "level", "time"]
-            return None
+            data = {}
         
         goal = (data.get("goal") or "").strip()
         level = (data.get("level") or "").strip()

@@ -1,28 +1,37 @@
-"""
-conftest.py
+"""Shared pytest fixtures for ``tests/integration``."""
 
-Fixtures for integration tests (chat flow)
-
-Key features:
-- fake_llm_client: factory to create a fake GeminiClient with arbitrary chunks
-- app_service: factory to create AppService with arbitrary LLM + config
-"""
-import pytest
+import json
+from pathlib import Path
 from unittest.mock import MagicMock
 
-from services import AppService, ChatService, SessionManager
+import pytest
+
 from ai import GeminiClient
+from config import DEFAULT_CONTEXT_MESSAGES, default_messages
 from memory import ChatMemory
-from config import default_messages, DEFAULT_CONTEXT_MESSAGES
+from services import AppService, ChatService, SessionManager
+from services.core.roadmap_service import RoadmapService
+from services.support.intent_detector import IntentDetector
+from services.support.profile_extractor import ProfileExtractor
+
+_FIXTURES_DIR = Path(__file__).resolve().parent.parent / "fixtures"
+
+
+@pytest.fixture
+def sample_roadmaps_data():
+    return json.loads((_FIXTURES_DIR / "sample_roadmaps.json").read_text(encoding="utf-8"))
+
+
+@pytest.fixture
+def sample_roadmap_llm_response_first(sample_roadmaps_data):
+    return json.dumps(sample_roadmaps_data[0], ensure_ascii=False)
+
 
 @pytest.fixture
 def fake_llm_client():
-    """
-    Fake LLM client factory
-    - Accepts a list of chunks
-    - Returns a GeminiClient fake stream with the correct chunks
-    """
-    def _factory(chunks):
+    """Returns a callable ``(chunks, *, generate_text_return=..., generate_text_side_effect=...) -> mock``."""
+
+    def _factory(chunks, *, generate_text_return=None, generate_text_side_effect=None):
         mock = MagicMock(spec=GeminiClient)
 
         def fake_stream_chat(history, new_message):
@@ -30,35 +39,29 @@ def fake_llm_client():
                 yield c
 
         mock.stream_chat = fake_stream_chat
+        if generate_text_side_effect is not None:
+            mock.generate_text.side_effect = generate_text_side_effect
+        elif generate_text_return is not None:
+            mock.generate_text.return_value = generate_text_return
         return mock
+
     return _factory
+
 
 @pytest.fixture
 def app_service():
-    """
-    AppService factory:
+    """Returns a callable ``(llm_client, **kwargs) -> AppService``."""
 
-    Usage:
-        app = app_service(
-            llm_client=custom_mock,
-            timeout_minutes=0,
-            chat_context_messages=2,
-        )
-    """
-    def _factory(
-        llm_client,
-        timeout_minutes: int = 30,
-        chat_context_messages=DEFAULT_CONTEXT_MESSAGES,
-    ):
-        chat_service = ChatService(llm_client=llm_client)
-        session_manager = SessionManager(timeout_minutes=timeout_minutes)
-        memory = ChatMemory()
-
+    def _factory(llm_client, timeout_minutes=30, chat_context_messages=DEFAULT_CONTEXT_MESSAGES):
         return AppService(
-            chat_service=chat_service,
-            session_manager=session_manager,
+            chat_service=ChatService(llm_client=llm_client),
+            session_manager=SessionManager(timeout_minutes=timeout_minutes),
             messages=default_messages,
-            memory=memory,
+            memory=ChatMemory(),
+            intent_detector=IntentDetector(llm_client=llm_client),
+            profile_extractor=ProfileExtractor(llm_client=llm_client),
+            roadmap_service=RoadmapService(llm_client=llm_client),
             chat_context_messages=chat_context_messages,
         )
+
     return _factory

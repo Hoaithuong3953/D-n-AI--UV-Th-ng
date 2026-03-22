@@ -17,7 +17,7 @@ from domain.events import TextChunk, StatusUpdate
 class TestChatFlowHappyPath:
     """Integration tests for successful chat flow scenarios"""
 
-    def test_user_message_generates_correct_event_stream(self, app_service,fake_llm_client):
+    def test_user_message_generates_correct_event_stream(self, app_service, fake_llm_client):
         """User sends message -> receives StatusUpdate, TextChunks in correct order"""
         user_input = "What is Python?"
         llm = fake_llm_client(

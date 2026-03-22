@@ -12,12 +12,13 @@ Tests:
 import pytest
 from unittest.mock import MagicMock
 
-from services import AppService, ChatService, SessionManager
-from services.chat_service import StreamError
 from ai import GeminiClient
-from memory import ChatMemory
 from config import default_messages, MessageKey, DEFAULT_CONTEXT_MESSAGES
+from domain import Intent, IntentResult, IntentDetectionMethod, ConfidenceLevel
 from domain.events import ErrorOccurred, StatusUpdate, TextChunk
+from memory import ChatMemory
+from services import AppService, ChatService, SessionManager
+from services.core.chat_service import StreamError
 from utils import LLMServiceError
 
 class TestChatFlowErrorHandling:
@@ -46,7 +47,7 @@ class TestChatFlowErrorHandling:
         assert len(history) == 2
         assert history[0].role == "user"
         assert history[1].role == "assistant"
-        assert "kết nối" in history[1].content.lower() or "lỗi" in history[1].content.lower()
+        assert history[1].content == app.messages.get(MessageKey.LLM_ERROR)
 
     def test_unexpected_error_handled_gracefully(self, app_service):
         """Unexpected errors -> ErrorOccurred event with generic message"""
@@ -73,12 +74,24 @@ class TestChatFlowErrorHandling:
         
         session_manager = SessionManager(timeout_minutes=30)
         memory = ChatMemory()
-        
+
+        mock_intent = MagicMock()
+        mock_intent.detect.return_value = IntentResult(
+            intent=Intent.CHAT,
+            method=IntentDetectionMethod.KEYWORD,
+            confidence=ConfidenceLevel.HIGH,
+        )
+        mock_profile = MagicMock()
+        mock_roadmap = MagicMock()
+
         app = AppService(
             chat_service=mock_chat_service,
             session_manager=session_manager,
             messages=default_messages,
             memory=memory,
+            intent_detector=mock_intent,
+            profile_extractor=mock_profile,
+            roadmap_service=mock_roadmap,
             chat_context_messages=DEFAULT_CONTEXT_MESSAGES,
         )
         
@@ -90,3 +103,25 @@ class TestChatFlowErrorHandling:
         assert len(text_chunks) == 1
         assert len(error_events) == 1
         assert error_events[0].error_type == "llm"
+
+    def test_intent_detection_llm_error_returns_llm_error_occurred(self, app_service):
+        """No roadmap keyword -> LLM intent; generate_text fails -> ErrorOccurred(llm)"""
+        mock_llm = MagicMock(spec=GeminiClient)
+        mock_llm.generate_text.side_effect = LLMServiceError(
+            code="INTENT_FAIL",
+            message="intent model down",
+        )
+
+        app = app_service(llm_client=mock_llm)
+        events = list(
+            app.handle_message(
+                "Giải thích chi tiết cho tôi về dependency injection trong Python với ví dụ"
+            )
+        )
+
+        error_events = [e for e in events if isinstance(e, ErrorOccurred)]
+        assert len(error_events) == 1
+        assert error_events[0].error_type == "llm"
+        history = app._memory.load_history()
+        assert len(history) == 2
+        assert history[1].role == "assistant"

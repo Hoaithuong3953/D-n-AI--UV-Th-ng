@@ -12,7 +12,7 @@ import pytest
 import time
 from unittest.mock import MagicMock
 
-from domain import ChatMessage
+from domain import ChatMessage, ConversationState
 from domain.events import SessionExpired
 
 class TestChatFlowSessionExpiration:
@@ -68,3 +68,46 @@ class TestChatFlowSessionState:
         
         history = app._memory.load_history()
         assert len(history) == 0
+
+    def test_reset_session_clears_profile_roadmap_after_roadmap_success(
+        self, app_service, fake_llm_client, sample_roadmap_llm_response_first
+    ):
+        """After a completed roadmap flow, reset clears domain objects and history"""
+        llm = fake_llm_client(
+            [],
+            generate_text_return=sample_roadmap_llm_response_first,
+        )
+        app = app_service(llm_client=llm)
+        list(
+            app.handle_message(
+                "Tôi muốn học Python, mới bắt đầu, 1 giờ/ngày"
+            )
+        )
+        assert app.current_profile is not None
+        assert app.current_roadmap is not None
+        assert app.conversation_state == ConversationState.NORMAL
+
+        app.reset_session()
+
+        assert app.current_profile is None
+        assert app.current_roadmap is None
+        assert app.conversation_state == ConversationState.NORMAL
+        assert len(app._memory.load_history()) == 0
+
+    def test_reset_session_clears_awaiting_profile_state(
+        self, app_service, fake_llm_client
+    ):
+        """After AWAITING_PROFILE_INFO (incomplete profile), reset returns NORMAL and clears memory"""
+        incomplete = '{"goal": "Học web"}'
+        llm = fake_llm_client([], generate_text_return=incomplete)
+        app = app_service(llm_client=llm)
+        list(app.handle_message("Tôi muốn tạo lộ trình"))
+        assert app.conversation_state == ConversationState.AWAITING_PROFILE_INFO
+        assert app.current_profile is None
+
+        app.reset_session()
+
+        assert app.conversation_state == ConversationState.NORMAL
+        assert app.current_profile is None
+        assert app.current_roadmap is None
+        assert len(app._memory.load_history()) == 0

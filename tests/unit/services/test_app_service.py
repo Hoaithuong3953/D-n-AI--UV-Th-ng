@@ -4,25 +4,25 @@ from datetime import datetime
 
 from config.messages import DefaultMessageProvider, MessageKey
 from config.constants import DEFAULT_CONTEXT_MESSAGES, MAX_INPUT_LENGTH
-from memory import ChatMemory
-from services import AppService
-from services.chat_service import StreamError
+from domain import ChatMessage, Intent, IntentResult, IntentDetectionMethod, ConfidenceLevel
 from domain.events import (
-    Event,
     ErrorOccurred,
     SessionExpired,
     StatusUpdate,
     TextChunk,
 )
-from domain.models import ChatMessage
+from memory import ChatMemory
+from services import AppService
+from services.core.chat_service import StreamError
 from utils import LLMServiceError
 
 def _make_app_service(
-        *,
-        chat_stream = None,
-        session_expired = False,
+    *,
+    chat_stream=None,
+    session_expired=False,
+    intent: Intent = Intent.CHAT,
 ):
-    """Build AppService with mocks (chat, session, memory)"""
+    """Build AppService with mocks (chat, session, memory, intent, profile, roadmap)"""
     mock_chat = MagicMock()
     if chat_stream is not None:
         mock_chat.stream_response.return_value = iter(chat_stream)
@@ -30,6 +30,19 @@ def _make_app_service(
     mock_session = MagicMock()
     mock_session.is_expired.return_value = session_expired
     mock_session.get_last_activity.return_value = None
+
+    mock_intent = MagicMock()
+    mock_intent.detect.return_value = IntentResult(
+        intent=intent,
+        method=IntentDetectionMethod.KEYWORD,
+        confidence=ConfidenceLevel.HIGH,
+    )
+
+    mock_profile = MagicMock()
+    mock_profile.extract.return_value = None
+    mock_profile.last_missing_fields = []
+
+    mock_roadmap = MagicMock()
 
     messages = DefaultMessageProvider()
     memory = ChatMemory()
@@ -39,6 +52,9 @@ def _make_app_service(
         session_manager=mock_session,
         messages=messages,
         memory=memory,
+        intent_detector=mock_intent,
+        profile_extractor=mock_profile,
+        roadmap_service=mock_roadmap,
         chat_context_messages=DEFAULT_CONTEXT_MESSAGES,
     )
     return app, mock_chat, mock_session
@@ -60,7 +76,7 @@ class TestAppServiceValidation:
     def test_whitespace_only_yields_error_occurred(self):
         """Whitespace only input -> ErrorOccurred(validation)"""
         app, mock_chat, _ = _make_app_service(chat_stream=[])
-        events = list(app.handle_message(""))
+        events = list(app.handle_message("   \t\n"))
 
         assert len(events) == 1
         assert isinstance(events[0], ErrorOccurred)

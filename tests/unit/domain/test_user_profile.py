@@ -29,7 +29,7 @@ class TestUserProfile:
         """Test creating user profile with all fields"""
         profile = UserProfile(
             goal="Learn Python",
-            current_level="intermedia",
+            current_level="intermediate",
             time_commitment="10 hours/week",
             learning_style="Visual",
             background="Software engineer",

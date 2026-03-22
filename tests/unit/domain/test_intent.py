@@ -1,12 +1,17 @@
 """
 test_intent.py
 
-Unit tests for domain.intent (Intent, IntentDetectionMethod, IntentResult)
+Unit tests for domain.intent (Intent, IntentDetectionMethod, IntentResult, ConfidenceLevel)
 """
 import pytest
 from pydantic import ValidationError
 
-from domain import Intent, IntentDetectionMethod, IntentResult
+from domain import (
+    ConfidenceLevel,
+    Intent,
+    IntentDetectionMethod,
+    IntentResult,
+)
 
 class TestIntent:
     """Tests for Intent enum values"""
@@ -24,6 +29,14 @@ class TestIntentDetectionMethod:
         assert IntentDetectionMethod.KEYWORD.value == "keyword"
         assert IntentDetectionMethod.LLM.value == "llm"
 
+class TestConfidenceLevel:
+    """Tests for ConfidenceLevel enum"""
+
+    def test_confidence_level_values(self):
+        assert ConfidenceLevel.LOW.value == "low"
+        assert ConfidenceLevel.MEDIUM.value == "medium"
+        assert ConfidenceLevel.HIGH.value == "high"
+
 class TestIntentResult:
     """Tests for IntentResult model"""
 
@@ -31,46 +44,29 @@ class TestIntentResult:
         """Valid IntentResult fields create instance successfully"""
         result = IntentResult(
             intent=Intent.CHAT,
-            score=0.9,
             method=IntentDetectionMethod.KEYWORD,
+            confidence=ConfidenceLevel.HIGH,
         )
 
         assert result.intent is Intent.CHAT
-        assert result.score == 0.9
         assert result.method is IntentDetectionMethod.KEYWORD
+        assert result.confidence is ConfidenceLevel.HIGH
 
-    def test_intent_result_score_boundaries(self):
-        """Score accepts boundary values 0.0 and 1.0"""
-        low = IntentResult(
-            intent=Intent.CHAT,
-            score=0.0,
-            method=IntentDetectionMethod.LLM,
-        )
-        high = IntentResult(
-            intent=Intent.ROADMAP,
-            score=1.0,
-            method=IntentDetectionMethod.KEYWORD,
-        )
+    def test_intent_result_accepts_all_confidence_levels(self):
+        """Each ConfidenceLevel is valid for IntentResult"""
+        for level in ConfidenceLevel:
+            r = IntentResult(
+                intent=Intent.ROADMAP,
+                method=IntentDetectionMethod.LLM,
+                confidence=level,
+            )
+            assert r.confidence is level
 
-        assert low.score == 0.0
-        assert high.score == 1.0
-
-    @pytest.mark.parametrize("score", [-0.01, -1.0])
-    def test_intent_result_score_below_zero_invalid(self, score: float):
-        """Score below 0.0 should raise ValidationError"""
-        with pytest.raises(ValidationError):
+    def test_intent_result_missing_confidence_invalid(self):
+        """confidence is required"""
+        with pytest.raises(ValidationError) as exc_info:
             IntentResult(
                 intent=Intent.CHAT,
-                score=score,
-                method=IntentDetectionMethod.LLM,
-            )
-
-    @pytest.mark.parametrize("score", [1.01, 2.0])
-    def test_intent_result_score_above_one_invalid(self, score: float):
-        """Score above 1.0 should raise ValidationError"""
-        with pytest.raises(ValidationError):
-            IntentResult(
-                intent=Intent.ROADMAP,
-                score=score,
                 method=IntentDetectionMethod.KEYWORD,
             )
+        assert any(err["loc"] == ("confidence",) for err in exc_info.value.errors())

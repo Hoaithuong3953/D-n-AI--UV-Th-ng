@@ -7,7 +7,14 @@ import pytest
 from pydantic import ValidationError
 from datetime import datetime
 
-from domain import ChatMessage
+from domain import ChatMessage, ConversationState
+
+class TestConversationState:
+    """ConversationState enum used in multi-turn flows"""
+
+    def test_enum_values(self):
+        assert ConversationState.NORMAL.value == "normal"
+        assert ConversationState.AWAITING_PROFILE_INFO.value == "awaiting_profile_info"
 
 class TestChatMessage:
     """Tests for ChatMessage model"""

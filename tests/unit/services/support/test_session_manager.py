@@ -1,13 +1,15 @@
 """
 test_session_manager.py
 
-Unit tests for services.session_manager (touch_activity, is_expired, reset_session, get/set_last_activity)
+Unit tests for services.support.session_manager
 """
 import pytest
 from datetime import datetime, timedelta
 from unittest.mock import patch
 
-from services.session_manager import SessionManager
+from services.support.session_manager import SessionManager
+
+_DT_PATCH = "services.support.session_manager.datetime"
 
 class TestSessionManagerInit:
     """Tests for SessionManager __init__ (timeout_minutes)"""
@@ -22,6 +24,7 @@ class TestSessionManagerInit:
 
 class TestSessionManagerIsExpired:
     """Tests for is_expired (no activity, just touched, after timeout)"""
+
     def test_no_activity_not_expired(self):
         """Session with no activity is not expired"""
         sm = SessionManager(timeout_minutes=30)
@@ -35,20 +38,11 @@ class TestSessionManagerIsExpired:
         assert sm.is_expired() is False
 
     def test_expired_after_timeout(self):
-        """At exact timeout boundary (not greater), should not be expired"""
-        sm = SessionManager(timeout_minutes=1)
-        sm.touch_activity()
-        past = sm._last_activity
-        with patch("services.session_manager.datetime") as mock_dt:
-            mock_dt.now.return_value = past + timedelta(minutes=2)
-            assert sm.is_expired() is True
-
-    def test_expired_after_timeout(self):
         """Session expired after timeout period"""
         sm = SessionManager(timeout_minutes=1)
         sm.touch_activity()
         past = sm._last_activity
-        with patch("services.session_manager.datetime") as mock_dt:
+        with patch(_DT_PATCH) as mock_dt:
             mock_dt.now.return_value = past + timedelta(minutes=2)
             assert sm.is_expired() is True
 
@@ -76,7 +70,7 @@ class TestSessionManagerTouchAndReset:
         first = sm.get_last_activity()
 
         assert first is not None
-        with patch("services.session_manager.datetime") as mock_dt:
+        with patch(_DT_PATCH) as mock_dt:
             future = first + timedelta(seconds=5)
             mock_dt.now.return_value = future
             sm.touch_activity()
@@ -90,7 +84,7 @@ class TestSessionManagerTouchAndReset:
         sm.touch_activity()
         past = sm._last_activity
 
-        with patch("services.session_manager.datetime") as mock_dt:
+        with patch(_DT_PATCH) as mock_dt:
             mock_dt.now.return_value = past + timedelta(minutes=2)
             assert sm.is_expired() is True
         sm.touch_activity()

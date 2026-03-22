@@ -7,7 +7,7 @@ import pytest
 from unittest.mock import MagicMock
 
 from domain import ChatMessage
-from services.chat_service import ChatService, StreamError
+from services.core.chat_service import ChatService, StreamError
 from config.messages import MessageKey
 from utils import LLMServiceError
 

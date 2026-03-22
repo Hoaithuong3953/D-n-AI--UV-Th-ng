@@ -5,6 +5,7 @@ Unit tests for GeminiClient (config validation, generate_text, stream_chat, _to_
 """
 import pytest
 from unittest.mock import MagicMock
+from google.api_core import exceptions as google_exceptions
 
 from ai.gemini_client import GeminiClient, _SAFETY_SETTINGS
 from domain import ChatMessage
@@ -42,6 +43,35 @@ def test_validate_config_rejects_empty_system_prompt():
             stream_timeout=30,
             system_prompt="   "
         )
+
+def test_init_model_invalid_argument_raises_validation_error(mock_genai_model):
+    """GenerativeModel raises InvalidArgument -> ValidationError with config message"""
+    model_cls, _, _ = mock_genai_model
+    model_cls.side_effect = google_exceptions.InvalidArgument("bad request")
+
+    with pytest.raises(ValidationError, match="Invalid Gemini API key or model name"):
+        GeminiClient(
+            api_key="dummy-key",
+            model_name="dummy-model",
+            request_timeout=30,
+            stream_timeout=30,
+            system_prompt="dummy-prompt",
+        )
+
+def test_init_model_unexpected_error_raises_llm_service_error(mock_genai_model):
+    """Unexpected error during GenerativeModel init -> LLMServiceError LLM_INIT_FAILED"""
+    model_cls, _, _ = mock_genai_model
+    model_cls.side_effect = RuntimeError("sdk boom")
+
+    with pytest.raises(LLMServiceError) as exc_info:
+        GeminiClient(
+            api_key="dummy-key",
+            model_name="dummy-model",
+            request_timeout=30,
+            stream_timeout=30,
+            system_prompt="dummy-prompt",
+        )
+    assert exc_info.value.code == "LLM_INIT_FAILED"
 
 def test_init_model_configures_genai_and_uses_system_prompt(mock_genai_model):
     """genai.configure and GenerativeModel receive api_key, model_name and system_instruction"""
@@ -84,6 +114,40 @@ def test_generate_text_success(mock_genai_model):
     call_args = model_instance.generate_content.call_args
     assert call_args.kwargs["safety_settings"] == _SAFETY_SETTINGS
     assert call_args.kwargs["request_options"]["timeout"] == 30
+
+def test_generate_text_google_api_error_raises_llm_service_error(mock_genai_model):
+    """generate_text maps GoogleAPICallError from generate_content to LLMServiceError"""
+    _, model_instance, _ = mock_genai_model
+    model_instance.generate_content.side_effect = google_exceptions.InvalidArgument("bad")
+
+    client = GeminiClient(
+        api_key="dummy-key",
+        model_name="dummy-model",
+        request_timeout=30,
+        stream_timeout=30,
+        system_prompt="dummy-prompt",
+    )
+
+    with pytest.raises(LLMServiceError) as exc_info:
+        client.generate_text("prompt")
+    assert exc_info.value.code == "GENERATION_FAILED"
+
+def test_generate_text_strips_response_whitespace(mock_genai_model):
+    """generate_text returns response.text stripped of leading/trailing whitespace"""
+    _, model_instance, _ = mock_genai_model
+    mock_response = MagicMock()
+    mock_response.text = "  padded  "
+    model_instance.generate_content.return_value = mock_response
+
+    client = GeminiClient(
+        api_key="dummy-key",
+        model_name="dummy-model",
+        request_timeout=30,
+        stream_timeout=30,
+        system_prompt="dummy-prompt",
+    )
+
+    assert client.generate_text("prompt") == "padded"
 
 def test_generate_text_empty_prompt_raises_validation_error(mock_genai_model):
     """generate_text raises ValidationError when prompt is empty or whitespace"""
@@ -185,6 +249,48 @@ def test_stream_chat_happy_path(mock_genai_model):
     assert call_kwargs["safety_settings"] == _SAFETY_SETTINGS
     assert call_kwargs["request_options"]["timeout"] == 30
     assert call_kwargs["stream"] is True
+
+def test_stream_chat_google_api_error_raises_llm_service_error(mock_genai_model):
+    """stream_chat maps GoogleAPICallError from send_message to LLMServiceError"""
+    _, model_instance, _ = mock_genai_model
+    fake_chat = MagicMock()
+    fake_chat.send_message.side_effect = google_exceptions.InvalidArgument("bad")
+    model_instance.start_chat.return_value = fake_chat
+
+    client = GeminiClient(
+        api_key="dummy-key",
+        model_name="dummy-model",
+        request_timeout=30,
+        stream_timeout=30,
+        system_prompt="dummy-prompt",
+    )
+
+    with pytest.raises(LLMServiceError) as exc_info:
+        list(client.stream_chat(history=[], new_message="hi"))
+    assert exc_info.value.code == "STREAM_FAILED"
+
+def test_stream_chat_skips_chunks_without_text(mock_genai_model):
+    """stream_chat yields only chunks where chunk.text is truthy"""
+    _, model_instance, _ = mock_genai_model
+
+    def fake_stream():
+        yield MagicMock(text=None)
+        yield MagicMock(text="")
+        yield MagicMock(text="ok")
+
+    fake_chat = MagicMock()
+    fake_chat.send_message.return_value = fake_stream()
+    model_instance.start_chat.return_value = fake_chat
+
+    client = GeminiClient(
+        api_key="dummy-key",
+        model_name="dummy-model",
+        request_timeout=30,
+        stream_timeout=30,
+        system_prompt="dummy-prompt",
+    )
+
+    assert list(client.stream_chat(history=[], new_message="x")) == ["ok"]
 
 def test_stream_chat_empty_new_message_raises_validation_error(mock_genai_model):
     """stream_chat raises ValidationError when new_message is empty or whitespace"""

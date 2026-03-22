@@ -23,6 +23,10 @@ class TestMessageKey:
         "INPUT_TOO_LONG": "input_too_long",
         "SESSION_EXPIRED": "session_expired",
         "FILL_PROFILE": "fill_profile",
+        "FILL_PROFILE_MISSING_GOAL": "fill_profile_missing_goal",
+        "FILL_PROFILE_MISSING_LEVEL": "fill_profile_missing_level",
+        "FILL_PROFILE_MISSING_TIME": "fill_profile_missing_time",
+        "FILL_PROFILE_MISSING_FIELDS": "fill_profile_missing_fields",
 
         "THINKING": "thinking",
 
@@ -35,6 +39,10 @@ class TestMessageKey:
         "ROADMAP_INVALID_JSON": "roadmap_invalid_json",
         "ROADMAP_INVALID_SCHEMA": "roadmap_invalid_schema",
         "ROADMAP_GENERATION_FAILED": "roadmap_generation_failed",
+
+        "CLARIFY_INTENT": "clarify_intent",
+
+        "PROFILE_STILL_INCOMPLETE": "profile_still_incomplete",
     }
     
     def test_every_message_key_has_expected_value(self):

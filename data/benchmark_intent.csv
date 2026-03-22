@@ -1,0 +1,89 @@
+text,expected
+"Tôi muốn học Python từ đầu, 1 giờ mỗi ngày",roadmap
+"Cho tôi lộ trình học web trong 3 tháng",roadmap
+"Tạo roadmap học Data Analyst giúp mình",roadmap
+"Kế hoạch học JavaScript cho người mới",roadmap
+"I need a learning path for React",roadmap
+"Bắt đầu học TypeScript như thế nào?",roadmap
+"Tôi muốn học trong 8 tuần tới",roadmap
+"Muốn học AWS có được không?",roadmap
+"Tôi muốn học machine learning",roadmap
+"Học trong 2 tháng có kịp không?",roadmap
+"Roadmap học DevOps",roadmap
+"Cho tôi kế hoạch học tiếng Anh",roadmap
+"Tạo lộ trình học Flutter",roadmap
+"Tôi muốn học SQL từ cơ bản",roadmap
+"Lộ trình học backend trong 6 tháng",roadmap
+"Kế hoạch học frontend cho người mới",roadmap
+"Roadmap học Node.js",roadmap
+"Learning path for Data Science",roadmap
+"Muốn học AI trong 1 năm",roadmap
+"Cho mình roadmap học cybersecurity",roadmap
+"Học Python trong 3 tháng có khả thi không?",roadmap
+"Mình học fullstack được không nếu chỉ 2h/ngày?",roadmap
+"Tôi mới bắt đầu, học lập trình có khó không?",roadmap
+"Học AI thì nên bắt đầu từ đâu?",roadmap
+"Mình 30 tuổi rồi, học code muộn quá hả?",roadmap
+"Tôi muốn học lập trình nhưng không biết bắt đầu từ đâu",roadmap
+"Học lập trình thì cần máy tính cấu hình cao không?",chat
+"Mình thích học qua video, có kênh nào tốt?",chat
+"Roadmap học lập trình thì có giống nhau không?",chat
+"Học AI thì cần học Python trước hả?",chat
+"Giải thích closure trong JS đi",chat
+"So sánh REST vs GraphQL chi tiết",chat
+"Viết ví dụ async/await Python",chat
+"OOP là gì? Giải thích đơn giản",chat
+"Lỗi 404 fix thế nào?",chat
+"Tài liệu học SQL free tốt nhất?",chat
+"Hello, chào bot!",chat
+"Cảm ơn nhé",chat
+"Tôi đang stress vì học mãi không vào",chat
+"Big O notation là gì?",chat
+"Query SQL chậm thì optimize sao?",chat
+"Python có những kiểu dữ liệu nào?",chat
+"List vs tuple khác gì?",chat
+"Event loop JS hoạt động ra sao?",chat
+"Recursion là gì? Ví dụ đơn giản",chat
+"SQL join các loại nào?",chat
+"HTTP 500 nghĩa là gì?",chat
+"Debug code Python thế nào?",chat
+"Sử dụng Git branch ra sao?",chat
+"Frontend backend khác nhau gì?",chat
+"REST API là gì?",chat
+"GraphQL hoạt động thế nào?",chat
+"Dependency injection là gì?",chat
+"Memory leak là gì?",chat
+"Thread vs process khác nhau?",chat
+"Tối ưu performance web app?",chat
+"Caching là gì? Các loại?",chat
+"Unit test là gì?",chat
+"Integration test khác unit test?",chat
+"Deploy web app lên đâu?",chat
+"CI/CD pipeline là gì?",chat
+"Container khác VM thế nào?",chat
+"Load balancing hoạt động sao?",chat
+"Event-driven architecture là gì?",chat
+"Microservices ưu nhược điểm?",chat
+"Serverless nghĩa là gì?",chat
+"Edge computing là gì?",chat
+"OAuth vs JWT khác nhau?",chat
+"Authentication vs Authorization?",chat
+"SSL/TLS hoạt động ra sao?",chat
+"HTTPS khác HTTP gì?",chat
+"DNS là gì?",chat
+"Firewall chặn cái gì?",chat
+"VPN dùng để làm gì?",chat
+"API Gateway là gì?",chat
+"WebSocket khác HTTP?",chat
+"Cho mình ví dụ code decorator Python",chat
+"Python hay JavaScript cho người mới?",chat
+"Học lập trình có cần giỏi toán không?",chat
+"Tôi học code 1 năm rồi mà vẫn ngu, sao vậy?",chat
+"Deadline dự án gần kề, stress quá!",chat
+"Thời tiết Hà Nội hôm nay mưa không?",chat
+"Học code online hay offline tốt hơn?",chat
+"Mình học code thì nên học Python hay Java trước?",chat
+"Tôi muốn học lập trình nhưng sợ khó",chat
+"Học lập trình có mất nhiều tiền không?",chat
+"Bot ơi hôm nay học gì vui?",chat
+"Mình đang buồn vì code lỗi hoài",chat

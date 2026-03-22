@@ -1,3 +1,3 @@
 """
-Test suite for LearnPath Chatbot
+Tests package for LearnPath Chatbot (unit and integration)
 """

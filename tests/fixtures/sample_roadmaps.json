@@ -10,7 +10,7 @@
                 "topic": "Python Basics",
                 "description": "Học về biến, kiểu dữ liệu và cấu trúc điều khiển",
                 "estimated_time": "10 giờ",
-                "learning_objective": [
+                "learning_objectives": [
                     "Hiểu về biến và kiểu dữ liệu",
                     "Sử dụng if/else, for, while",
                     "Làm quen với Python syntax"
@@ -37,7 +37,7 @@
                 "topic": "Functions and Modules",
                 "description": "Học về functions, modules và packages",
                 "estimated_time": "8 giờ",
-                "learning_objective": [
+                "learning_objectives": [
                     "Tạo và sử dụng functions",
                     "Import và sử dụng modules",
                     "Hiểu về scope và namespaces"
@@ -57,7 +57,7 @@
                 "topic": "Data Structures",
                 "description": "Học về list, dict, tuple, set",
                 "estimated_time": "12 giờ",
-                "learning_objective": [
+                "learning_objectives": [
                     "Sử dụng list, dict, tuple, set",
                     "Hiểu về list comprehensions",
                     "Thao tác với data structures"
@@ -77,7 +77,7 @@
                 "topic": "Object-Oiriented Programming",
                 "description": "Học về classes, objects, inheritance",
                 "estimated_time": "10 giờ",
-                "learning_objective": [
+                "learning_objectives": [
                     "Tạo và sử dụng classes",
                     "Hiểu về inheritance",
                     "Sử dụng OOP priciples"
@@ -100,7 +100,7 @@
     },
     {
         "topic": "Học Web Development với Python",
-        "duration_week": 8,
+        "duration_week": 1,
         "milestones": [
             {
                 "week": 1,

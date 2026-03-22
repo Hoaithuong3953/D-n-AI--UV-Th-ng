@@ -1,5 +1,11 @@
 """
+conftest.py
+
 Pytest fixtures for LearnPath chatbot tests
+
+Key features:
+- mock_genai_model: patch Gemini SDK for GeminiClient tests
+- sample_* fixtures: ChatMessage, UserProfile, Resource, Milestone, Roadmap (minimal/full)
 """
 import pytest
 from unittest.mock import MagicMock, patch
